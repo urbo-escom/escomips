@@ -1,0 +1,241 @@
+ISim log file
+Running: ./sim.exe -tclbatch sim.tcl -wdb sim.wdb 
+ISim P.20131013 (signature 0xfbc00daa)
+This is a Full version of ISim.
+Time resolution is 1 ns
+# onerror resume
+# wave add -radix hex /
+# wave add -radix dec /
+# run all
+Simulator is doing circuit initialization process.
+at 0 ns: Note: Instr = UUUUU,UUUU,UUUU,'U' (/control_test/).
+at 0 ns: Note: Branch true! (/control_test/control0/control_asm0/).
+at 0 ns, Instance /control_test/control0/control_funcode0/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 0 ns, Instance /control_test/control0/control_funcode0/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 0 ns: Note: func:  ADD (/control_test/control0/control_funcode0/).
+at 0 ns, Instance /control_test/control0/control_opcode0/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 0 ns, Instance /control_test/control0/control_opcode0/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 0 ns: Note: op:   CMP (/control_test/control0/control_opcode0/).
+Finished circuit initialization process.
+at 0 ns: Note: func:  ADD (/control_test/control0/control_funcode0/).
+at 0 ns: Note: op:   CMP (/control_test/control0/control_opcode0/).
+at 0 ns: Note: Normal instruction... (/control_test/control0/control_asm0/).
+at 125 ns: Note: Instr = 00000,0000,0000,'0' (/control_test/).
+at 250 ns: Note: Instr = 00000,0000,0000,'0' (/control_test/).
+at 375 ns: Note: Instr = 00000,0000,0000,'1' (/control_test/).
+at 500 ns: Note: Instr = 00000,0000,0000,'1' (/control_test/).
+at 500 ns(3): Note: Normal instruction... (/control_test/control0/control_asm0/).
+at 500 ns(6): Note: op:    LI (/control_test/control0/control_opcode0/).
+at 625 ns: Note: Instr = 00001,0000,0000,'0' (/control_test/).
+at 625 ns(3): Note: Normal instruction... (/control_test/control0/control_asm0/).
+at 750 ns: Note: Instr = 00001,0000,0000,'0' (/control_test/).
+at 750 ns(2): Note: op:   RET (/control_test/control0/control_opcode0/).
+at 750 ns(3): Note: Normal instruction... (/control_test/control0/control_asm0/).
+at 875 ns: Note: Instr = 10101,0000,0000,'0' (/control_test/).
+at 875 ns(3): Note: Normal instruction... (/control_test/control0/control_asm0/).
+at 1 us: Note: Instr = 10101,0000,0000,'0' (/control_test/).
+at 1 us(1): Note: beqi (/control_test/control0/control_decoder0/).
+at 1 us(2): Note: op:  BEQI (/control_test/control0/control_opcode0/).
+at 1 us(3): Note: Branch comparing... (/control_test/control0/control_asm0/).
+at 1 us(6): Note: op:   CMP (/control_test/control0/control_opcode0/).
+at 1125 ns: Note: Instr = 01101,0000,0000,'1' (/control_test/).
+at 1125 ns(3): Note: Branch false (/control_test/control0/control_asm0/).
+at 1250 ns: Note: Instr = 01101,0000,0000,'1' (/control_test/).
+at 1250 ns(1): Note: bleti (/control_test/control0/control_decoder0/).
+at 1250 ns(3): Note: Branch comparing... (/control_test/control0/control_asm0/).
+at 1250 ns(4): Note: Branch comparing... (/control_test/control0/control_asm0/).
+at 1375 ns: Note: Instr = 10000,0000,0010,'1' (/control_test/).
+at 1375 ns(3): Note: Branch true! (/control_test/control0/control_asm0/).
+at 1375 ns(6): Note: op: BLETI (/control_test/control0/control_opcode0/).
+at 1500 ns: Note: Instr = 10000,0000,0010,'1' (/control_test/).
+at 1500 ns(1): Note: func:  SUB (/control_test/control0/control_funcode0/).
+at 1500 ns(2): Note: op:   CMP (/control_test/control0/control_opcode0/).
+at 1625 ns: Note: Instr = 00000,0001,0000,'1' (/control_test/).
+at 1750 ns: Note: Instr = 00000,0001,0000,'1' (/control_test/).
+at 1750 ns(1): Note: func:  ADD (/control_test/control0/control_funcode0/).
+at 1875 ns: Note: Instr = 00000,0000,0000,'0' (/control_test/).
+at 2 us: Note: Instr = 00000,0000,0000,'0' (/control_test/).
+at 2125 ns: Note: Instr = 00000,0000,0001,'1' (/control_test/).
+at 2250 ns: Note: Instr = 00000,0000,0010,'1' (/control_test/).
+at 2250 ns(1): Note: func:  SUB (/control_test/control0/control_funcode0/).
+at 2375 ns: Note: Instr = 00000,0001,0001,'1' (/control_test/).
+at 2375 ns(1): Note: func:  AND (/control_test/control0/control_funcode0/).
+at 2500 ns: Note: Instr = 00000,0010,0100,'1' (/control_test/).
+at 2500 ns(1): Note: func:   OR (/control_test/control0/control_funcode0/).
+at 2625 ns: Note: Instr = 00000,0011,1100,'1' (/control_test/).
+at 2625 ns(1): Note: func:  XOR (/control_test/control0/control_funcode0/).
+at 2750 ns: Note: Instr = 00000,0100,0011,'1' (/control_test/).
+at 2750 ns(1): Note: func: NAND (/control_test/control0/control_funcode0/).
+at 2875 ns: Note: Instr = 00000,0101,1000,'1' (/control_test/).
+at 2875 ns(1): Note: func:  NOR (/control_test/control0/control_funcode0/).
+at 3 us: Note: Instr = 00000,0110,0001,'1' (/control_test/).
+at 3 us(1): Note: func: XNOR (/control_test/control0/control_funcode0/).
+at 3125 ns: Note: Instr = 00000,0111,0100,'1' (/control_test/).
+at 3125 ns(1): Note: func:  NOT (/control_test/control0/control_funcode0/).
+at 3250 ns: Note: Instr = 00000,1000,0010,'1' (/control_test/).
+at 3250 ns(1): Note: func:  SLL (/control_test/control0/control_funcode0/).
+at 3375 ns: Note: Instr = 00000,1001,0000,'0' (/control_test/).
+at 3375 ns(1): Note: func:  SRL (/control_test/control0/control_funcode0/).
+at 3500 ns: Note: Instr = 00000,1010,0000,'0' (/control_test/).
+at 3500 ns(1): Note: func: UNKOWN (/control_test/control0/control_funcode0/).
+at 3625 ns: Note: Instr = 00000,1011,0000,'0' (/control_test/).
+at 3625 ns(1): Note: func: UNKOWN (/control_test/control0/control_funcode0/).
+at 3750 ns: Note: Instr = 00000,1100,0000,'0' (/control_test/).
+at 3750 ns(1): Note: func: XNOR (/control_test/control0/control_funcode0/).
+at 3750 ns(3): Note: Normal instruction... (/control_test/control0/control_asm0/).
+at 3750 ns(6): Note: op:    LI (/control_test/control0/control_opcode0/).
+at 3875 ns: Note: Instr = 00001,0111,0000,'0' (/control_test/).
+at 3875 ns(1): Note: func:  XOR (/control_test/control0/control_funcode0/).
+at 3875 ns(2): Note: op:   LWI (/control_test/control0/control_opcode0/).
+at 3875 ns(3): Note: Normal instruction... (/control_test/control0/control_asm0/).
+at 4 us: Note: Instr = 00010,0100,0000,'0' (/control_test/).
+at 4 us(1): Note: func:  NOT (/control_test/control0/control_funcode0/).
+at 4 us(2): Note: op:   SWI (/control_test/control0/control_opcode0/).
+at 4 us(3): Note: Normal instruction... (/control_test/control0/control_asm0/).
+at 4125 ns: Note: Instr = 00011,1000,0000,'0' (/control_test/).
+at 4125 ns(1): Note: func:  NOR (/control_test/control0/control_funcode0/).
+at 4125 ns(2): Note: op:    SW (/control_test/control0/control_opcode0/).
+at 4125 ns(3): Note: Normal instruction... (/control_test/control0/control_asm0/).
+at 4250 ns: Note: Instr = 00100,0110,0000,'0' (/control_test/).
+at 4250 ns(1): Note: func:  ADD (/control_test/control0/control_funcode0/).
+at 4250 ns(2): Note: op:  ADDI (/control_test/control0/control_opcode0/).
+at 4250 ns(3): Note: Normal instruction... (/control_test/control0/control_asm0/).
+at 4375 ns: Note: Instr = 00101,0000,0010,'1' (/control_test/).
+at 4375 ns(1): Note: func:  NOR (/control_test/control0/control_funcode0/).
+at 4375 ns(2): Note: op:  SUBI (/control_test/control0/control_opcode0/).
+at 4375 ns(3): Note: Normal instruction... (/control_test/control0/control_asm0/).
+at 4500 ns: Note: Instr = 00110,0110,0001,'1' (/control_test/).
+at 4500 ns(1): Note: func:  XOR (/control_test/control0/control_funcode0/).
+at 4500 ns(2): Note: op:  ANDI (/control_test/control0/control_opcode0/).
+at 4500 ns(3): Note: Normal instruction... (/control_test/control0/control_asm0/).
+at 4625 ns: Note: Instr = 00111,0100,0011,'1' (/control_test/).
+at 4625 ns(1): Note: func:  SRL (/control_test/control0/control_funcode0/).
+at 4625 ns(2): Note: op:   ORI (/control_test/control0/control_opcode0/).
+at 4625 ns(3): Note: Normal instruction... (/control_test/control0/control_asm0/).
+at 4750 ns: Note: Instr = 01000,1010,0100,'1' (/control_test/).
+at 4750 ns(1): Note: func:  XOR (/control_test/control0/control_funcode0/).
+at 4750 ns(2): Note: op:  XORI (/control_test/control0/control_opcode0/).
+at 4750 ns(3): Note: Normal instruction... (/control_test/control0/control_asm0/).
+at 4875 ns: Note: Instr = 01001,0100,1000,'1' (/control_test/).
+at 4875 ns(1): Note: func:  SUB (/control_test/control0/control_funcode0/).
+at 4875 ns(2): Note: op: NANDI (/control_test/control0/control_opcode0/).
+at 4875 ns(3): Note: Normal instruction... (/control_test/control0/control_asm0/).
+at 5 us: Note: Instr = 01010,0001,1100,'1' (/control_test/).
+at 5 us(1): Note: func:   OR (/control_test/control0/control_funcode0/).
+at 5 us(2): Note: op:  NORI (/control_test/control0/control_opcode0/).
+at 5 us(3): Note: Normal instruction... (/control_test/control0/control_asm0/).
+at 5125 ns: Note: Instr = 01011,0011,0101,'1' (/control_test/).
+at 5125 ns(1): Note: func: UNKOWN (/control_test/control0/control_funcode0/).
+at 5125 ns(2): Note: op: XNORI (/control_test/control0/control_opcode0/).
+at 5125 ns(3): Note: Normal instruction... (/control_test/control0/control_asm0/).
+at 5250 ns: Note: Instr = 01100,1111,1010,'1' (/control_test/).
+at 5250 ns(1): Note: func:  ADD (/control_test/control0/control_funcode0/).
+at 5250 ns(2): Note: op:    LW (/control_test/control0/control_opcode0/).
+at 5250 ns(3): Note: Normal instruction... (/control_test/control0/control_asm0/).
+at 5375 ns: Note: Instr = 10111,0000,0000,'1' (/control_test/).
+at 5375 ns(1): Note: beqi (/control_test/control0/control_decoder0/).
+at 5375 ns(1): Note: func: UNKOWN (/control_test/control0/control_funcode0/).
+at 5375 ns(2): Note: op:  BEQI (/control_test/control0/control_opcode0/).
+at 5375 ns(3): Note: Branch false (/control_test/control0/control_asm0/).
+at 5375 ns(6): Note: op:   CMP (/control_test/control0/control_opcode0/).
+at 5500 ns: Note: Instr = 01101,1111,0000,'1' (/control_test/).
+at 5500 ns(1): Note: func: UNKOWN (/control_test/control0/control_funcode0/).
+at 5500 ns(3): Note: Branch comparing... (/control_test/control0/control_asm0/).
+at 5625 ns: Note: Instr = 01101,1011,0010,'1' (/control_test/).
+at 5625 ns(1): Note: func: UNKOWN (/control_test/control0/control_funcode0/).
+at 5625 ns(3): Note: Branch false (/control_test/control0/control_asm0/).
+at 5750 ns: Note: Instr = 01101,1101,0010,'1' (/control_test/).
+at 5750 ns(1): Note: bneq (/control_test/control0/control_decoder0/).
+at 5750 ns(1): Note: func: UNKOWN (/control_test/control0/control_funcode0/).
+at 5750 ns(3): Note: Branch comparing... (/control_test/control0/control_asm0/).
+at 5750 ns(4): Note: Branch comparing... (/control_test/control0/control_asm0/).
+at 5875 ns: Note: Instr = 01110,1110,0010,'1' (/control_test/).
+at 5875 ns(1): Note: func: UNKOWN (/control_test/control0/control_funcode0/).
+at 5875 ns(3): Note: Branch true! (/control_test/control0/control_asm0/).
+at 5875 ns(6): Note: op:  BNEI (/control_test/control0/control_opcode0/).
+at 6 us: Note: Instr = 01110,1100,0000,'1' (/control_test/).
+at 6 us(1): Note: func:   OR (/control_test/control0/control_funcode0/).
+at 6 us(3): Note: Branch comparing... (/control_test/control0/control_asm0/).
+at 6 us(6): Note: op:   CMP (/control_test/control0/control_opcode0/).
+at 6125 ns: Note: Instr = 01110,0011,0000,'1' (/control_test/).
+at 6125 ns(1): Note: blti (/control_test/control0/control_decoder0/).
+at 6125 ns(1): Note: func:  SUB (/control_test/control0/control_funcode0/).
+at 6125 ns(3): Note: Branch true! (/control_test/control0/control_asm0/).
+at 6125 ns(4): Note: Branch true! (/control_test/control0/control_asm0/).
+at 6125 ns(6): Note: op:  BLTI (/control_test/control0/control_opcode0/).
+at 6250 ns: Note: Instr = 01111,0001,1100,'1' (/control_test/).
+at 6250 ns(1): Note: func:  ADD (/control_test/control0/control_funcode0/).
+at 6250 ns(3): Note: Branch comparing... (/control_test/control0/control_asm0/).
+at 6250 ns(6): Note: op:   CMP (/control_test/control0/control_opcode0/).
+at 6375 ns: Note: Instr = 01111,0000,1000,'1' (/control_test/).
+at 6375 ns(1): Note: func:  AND (/control_test/control0/control_funcode0/).
+at 6375 ns(3): Note: Branch true! (/control_test/control0/control_asm0/).
+at 6375 ns(6): Note: op:  BLTI (/control_test/control0/control_opcode0/).
+at 6500 ns: Note: Instr = 01111,0010,0100,'1' (/control_test/).
+at 6500 ns(1): Note: bleti (/control_test/control0/control_decoder0/).
+at 6500 ns(1): Note: func:  XOR (/control_test/control0/control_funcode0/).
+at 6500 ns(2): Note: op: BLETI (/control_test/control0/control_opcode0/).
+at 6500 ns(3): Note: Branch comparing... (/control_test/control0/control_asm0/).
+at 6500 ns(4): Note: Branch comparing... (/control_test/control0/control_asm0/).
+at 6500 ns(6): Note: op:   CMP (/control_test/control0/control_opcode0/).
+at 6625 ns: Note: Instr = 10000,0100,0000,'1' (/control_test/).
+at 6625 ns(1): Note: func:  NOR (/control_test/control0/control_funcode0/).
+at 6625 ns(3): Note: Branch true! (/control_test/control0/control_asm0/).
+at 6625 ns(6): Note: op: BLETI (/control_test/control0/control_opcode0/).
+at 6750 ns: Note: Instr = 10000,0110,1110,'1' (/control_test/).
+at 6750 ns(1): Note: func: NAND (/control_test/control0/control_funcode0/).
+at 6750 ns(3): Note: Branch comparing... (/control_test/control0/control_asm0/).
+at 6750 ns(6): Note: op:   CMP (/control_test/control0/control_opcode0/).
+at 6875 ns: Note: Instr = 10000,0101,1000,'1' (/control_test/).
+at 6875 ns(1): Note: bgti (/control_test/control0/control_decoder0/).
+at 6875 ns(1): Note: func: XNOR (/control_test/control0/control_funcode0/).
+at 6875 ns(3): Note: Branch true! (/control_test/control0/control_asm0/).
+at 6875 ns(4): Note: Branch false (/control_test/control0/control_asm0/).
+at 6875 ns(6): Note: op:  BGTI (/control_test/control0/control_opcode0/).
+at 6875 ns(7): Note: op:   CMP (/control_test/control0/control_opcode0/).
+at 7 us: Note: Instr = 10001,0111,1010,'1' (/control_test/).
+at 7 us(1): Note: func:  SRL (/control_test/control0/control_funcode0/).
+at 7 us(3): Note: Branch comparing... (/control_test/control0/control_asm0/).
+at 7 us(4): Note: Branch comparing... (/control_test/control0/control_asm0/).
+at 7125 ns: Note: Instr = 10001,1010,1100,'1' (/control_test/).
+at 7125 ns(1): Note: func:  NOT (/control_test/control0/control_funcode0/).
+at 7125 ns(3): Note: Branch true! (/control_test/control0/control_asm0/).
+at 7125 ns(6): Note: op:  BGTI (/control_test/control0/control_opcode0/).
+at 7250 ns: Note: Instr = 10001,1000,0000,'1' (/control_test/).
+at 7250 ns(1): Note: bgeti (/control_test/control0/control_decoder0/).
+at 7250 ns(1): Note: func: UNKOWN (/control_test/control0/control_funcode0/).
+at 7250 ns(2): Note: op: BGETI (/control_test/control0/control_opcode0/).
+at 7250 ns(3): Note: Branch comparing... (/control_test/control0/control_asm0/).
+at 7250 ns(4): Note: Branch comparing... (/control_test/control0/control_asm0/).
+at 7250 ns(6): Note: op:   CMP (/control_test/control0/control_opcode0/).
+at 7375 ns: Note: Instr = 10010,1111,1000,'1' (/control_test/).
+at 7375 ns(1): Note: func:  SLL (/control_test/control0/control_funcode0/).
+at 7375 ns(3): Note: Branch false (/control_test/control0/control_asm0/).
+at 7500 ns: Note: Instr = 10010,1001,1010,'1' (/control_test/).
+at 7500 ns(1): Note: func: UNKOWN (/control_test/control0/control_funcode0/).
+at 7500 ns(3): Note: Branch comparing... (/control_test/control0/control_asm0/).
+at 7500 ns(4): Note: Branch comparing... (/control_test/control0/control_asm0/).
+at 7625 ns: Note: Instr = 10010,1101,1100,'1' (/control_test/).
+at 7625 ns(1): Note: func:  SLL (/control_test/control0/control_funcode0/).
+at 7625 ns(3): Note: Normal instruction... (/control_test/control0/control_asm0/).
+at 7625 ns(4): Note: Normal instruction... (/control_test/control0/control_asm0/).
+at 7625 ns(6): Note: op:     B (/control_test/control0/control_opcode0/).
+at 7750 ns: Note: Instr = 10011,1001,1100,'0' (/control_test/).
+at 7750 ns(1): Note: func: UNKOWN (/control_test/control0/control_funcode0/).
+at 7750 ns(2): Note: op:  CALL (/control_test/control0/control_opcode0/).
+at 7750 ns(3): Note: Normal instruction... (/control_test/control0/control_asm0/).
+at 7875 ns: Note: Instr = 10100,1111,0000,'0' (/control_test/).
+at 7875 ns(1): Note: func:  ADD (/control_test/control0/control_funcode0/).
+at 7875 ns(2): Note: op:   RET (/control_test/control0/control_opcode0/).
+at 7875 ns(3): Note: Normal instruction... (/control_test/control0/control_asm0/).
+at 8 us: Note: Instr = 10101,0000,0000,'0' (/control_test/).
+at 8 us(2): Note: op:   NOP (/control_test/control0/control_opcode0/).
+at 8 us(3): Note: Normal instruction... (/control_test/control0/control_asm0/).
+at 8125 ns: Note: Instr = 10110,0000,0000,'0' (/control_test/).
+at 8125 ns(2): Note: op: UNKOWN (/control_test/control0/control_opcode0/).
+at 8125 ns(3): Note: Normal instruction... (/control_test/control0/control_asm0/).
+at 8250 ns: Note: Instr = 11000,0000,0000,'0' (/control_test/).
+at 8250 ns(3): Note: Normal instruction... (/control_test/control0/control_asm0/).
+at 8375 ns(3): Note: Normal instruction... (/control_test/control0/control_asm0/).
+at 8375 ns(5): Note: Normal instruction... (/control_test/control0/control_asm0/).
+# quit
