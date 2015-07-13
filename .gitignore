@@ -6,3 +6,5 @@
 *.cmd
 *.lso
 *.xrpt
+*nexys3/
+*nexys4/

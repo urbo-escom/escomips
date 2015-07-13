@@ -1,0 +1,25 @@
+ISim log file
+Running: ./sim.exe -tclbatch sim.tcl -wdb sim.wdb 
+ISim P.20131013 (signature 0xfbc00daa)
+This is a Full version of ISim.
+Time resolution is 1 ns
+# onerror resume
+# wave add -radix hex /
+# wave add -radix dec /
+# run all
+Simulator is doing circuit initialization process.
+Finished circuit initialization process.
+at 125 ns(1), Instance /stack_test/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 125 ns(1): Note: PC = NULL (/stack_test/stack0/).
+at 375 ns(1): Note: PC[0]++ = 1 (/stack_test/stack0/).
+at 625 ns(1): Note: PC[0]++ = 2 (/stack_test/stack0/).
+at 875 ns(1): Note: PC[0] = 4660 (/stack_test/stack0/).
+at 1125 ns(1): Note: PC[0]++ = 4661 (/stack_test/stack0/).
+at 1375 ns(1): Note: PC[0]++ = 4662 (/stack_test/stack0/).
+at 1625 ns(1): Note: SP++, PC[1] = 22136 (/stack_test/stack0/).
+at 1875 ns(1): Note: PC[1]++ = 22137 (/stack_test/stack0/).
+at 2125 ns(1): Note: PC[1]++ = 22138 (/stack_test/stack0/).
+at 2375 ns(1): Note: SP--, PC[0] = 4662 (/stack_test/stack0/).
+at 2625 ns(1): Note: PC[0]++ = 4663 (/stack_test/stack0/).
+at 2875 ns(1): Note: PC[0]++ = 4664 (/stack_test/stack0/).
+# quit

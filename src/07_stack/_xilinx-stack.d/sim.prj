@@ -1,0 +1,3 @@
+vhdl work ../../../src/07_stack/stack-arch.vhdl
+vhdl work ../../../src/07_stack/stack-test.vhdl
+vhdl work ../../../src/00_util/util-arch.vhdl
