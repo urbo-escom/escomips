@@ -1,0 +1,11 @@
+# format:
+#     addr  | opcode  [19-16]  [15-12]  [11- 8]  [ 7- 4]  [ 3- 0]
+#      hex  |   bin     bin      bin      bin      bin      bin
+
+    0x0000
+    0x0001
+    0x0002
+    0x0003
+    0x0004
+    0x0002
+    0x0003

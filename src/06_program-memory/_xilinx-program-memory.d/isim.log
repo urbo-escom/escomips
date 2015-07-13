@@ -1,0 +1,17 @@
+ISim log file
+Running: ./sim.exe -tclbatch sim.tcl -wdb sim.wdb 
+ISim P.20131013 (signature 0xfbc00daa)
+This is a Full version of ISim.
+Time resolution is 1 ns
+# onerror resume
+# wave add -radix hex /
+# wave add -radix dec /
+# run all
+Simulator is doing circuit initialization process.
+Finished circuit initialization process.
+at 125 ns(1), Instance /program_memory_test/program_memory0/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 375 ns(1), Instance /program_memory_test/program_memory0/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 625 ns(1), Instance /program_memory_test/program_memory0/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 875 ns(1), Instance /program_memory_test/program_memory0/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 1125 ns(1), Instance /program_memory_test/program_memory0/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+# quit
