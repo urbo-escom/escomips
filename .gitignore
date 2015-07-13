@@ -1,0 +1,8 @@
+*isim/
+*xst/
+*.exe
+*.xml
+*.xmsgs
+*.cmd
+*.lso
+*.xrpt

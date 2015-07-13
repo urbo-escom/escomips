@@ -1,0 +1,27 @@
+Running: /opt/Xilinx/14.7/ISE_DS/ISE/bin/lin64/unwrapped/fuse -incremental -timeprecision_vhdl 1ns -generic_top test_in=../../../src/00_util/util-test-in.txt -generic_top test_out=../../../src/00_util/util-test-out.txt -prj sim.prj work.util_test -o sim.exe 
+ISim P.20131013 (signature 0xfbc00daa)
+Number of CPUs detected in this system: 2
+Turning on mult-threading, number of parallel sub-compilation jobs: 4 
+Determining compilation order of HDL files
+Parsing VHDL file "../../../src/00_util/util-arch.vhdl" into library work
+Parsing VHDL file "../../../src/00_util/util-test.vhdl" into library work
+Starting static elaboration
+Completed static elaboration
+Fuse Memory Usage: 96656 KB
+Fuse CPU Usage: 2510 ms
+Compiling package standard
+Compiling package textio
+Compiling package std_logic_1164
+Compiling package numeric_std
+Compiling package math
+Compiling package ctype
+Compiling package conv
+Compiling architecture clock_pulse_arch of entity clock_pulse [\clock_pulse(250)\]
+Compiling architecture util_test_arch of entity util_test
+Time Resolution for simulation is 1ns.
+Waiting for 4 sub-compilation(s) to finish...
+Compiled 10 VHDL Units
+Built simulation executable sim.exe
+Fuse Memory Usage: 414644 KB
+Fuse CPU Usage: 3370 ms
+GCC CPU Usage: 13610 ms
