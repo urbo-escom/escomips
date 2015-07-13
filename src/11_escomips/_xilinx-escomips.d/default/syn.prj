@@ -1,0 +1,17 @@
+vhdl work ../../../../src/11_escomips/escomips-arch.vhdl
+vhdl work ../../../../src/03_alu/alu-arch.vhdl
+vhdl work ../../../../src/10_control/control-arch.vhdl
+vhdl work ../../../../src/10_control/control-asm-arch.vhdl
+vhdl work ../../../../src/10_control/control-clock-arch.vhdl
+vhdl work ../../../../src/10_control/control-cond-arch.vhdl
+vhdl work ../../../../src/10_control/control-decoder-arch.vhdl
+vhdl work ../../../../src/10_control/control-flags-arch.vhdl
+vhdl work ../../../../src/10_control/control-funcode-arch.vhdl
+vhdl work ../../../../src/10_control/control-opcode-arch.vhdl
+vhdl work ../../../../src/05_data-memory/data-memory-arch.vhdl
+vhdl work ../../../../src/11_escomips/dir-ext-arch.vhdl
+vhdl work ../../../../src/09_microinstr/microinstr-arch.vhdl
+vhdl work ../../../../src/04_register-file/register-file-arch.vhdl
+vhdl work ../../../../src/11_escomips/sign-ext-arch.vhdl
+vhdl work ../../../../src/07_stack/stack-arch.vhdl
+vhdl work ../../../../src/00_util/util-arch.vhdl

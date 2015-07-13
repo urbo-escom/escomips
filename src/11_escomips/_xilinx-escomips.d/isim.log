@@ -1,0 +1,209 @@
+ISim log file
+Running: ./sim.exe -tclbatch sim.tcl -wdb sim.wdb 
+INFO: There is another simulation running in the same directory. Using database file name sim1.wdb.
+ISim P.20131013 (signature 0xfbc00daa)
+This is a Full version of ISim.
+Time resolution is 1 ns
+# onerror resume
+# wave add -radix hex /
+# wave add -radix dec /
+# run all
+Simulator is doing circuit initialization process.
+at 0 ns: Note: Waiting 10 clocks (/escomips_test/).
+at 0 ns, Instance /escomips_test/program0/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 0 ns, Instance /escomips_test/escomips0/register_file0/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 0 ns, Instance /escomips_test/escomips0/register_file0/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 0 ns: Note: Branch true! (/escomips_test/escomips0/control0/control_asm0/).
+at 0 ns, Instance /escomips_test/escomips0/control0/control_funcode0/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 0 ns, Instance /escomips_test/escomips0/control0/control_funcode0/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 0 ns: Note: func:  ADD (/escomips_test/escomips0/control0/control_funcode0/).
+at 0 ns, Instance /escomips_test/escomips0/control0/control_opcode0/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 0 ns, Instance /escomips_test/escomips0/control0/control_opcode0/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 0 ns: Note: op:   CMP (/escomips_test/escomips0/control0/control_opcode0/).
+Finished circuit initialization process.
+at 0 ns: Note: func:  SUB (/escomips_test/escomips0/control0/control_funcode0/).
+at 0 ns: Note: Normal instruction... (/escomips_test/escomips0/control0/control_asm0/).
+at 0 ns: Note: op:    LI (/escomips_test/escomips0/control0/control_opcode0/).
+at 0 ns: Note: Normal instruction... (/escomips_test/escomips0/control0/control_asm0/).
+at 125 ns(1), Instance /escomips_test/escomips0/stack0/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 125 ns(1): Note: PC[0]++ = 1 (/escomips_test/escomips0/stack0/).
+at 125 ns(1): Note: write reg[0] = 1 (/escomips_test/escomips0/register_file0/).
+at 125 ns(1): Note: read reg[0] = 0, reg[0] = 0 (/escomips_test/escomips0/register_file0/).
+at 125 ns(1): Note: read mem[0] = 0 (/escomips_test/escomips0/data_memory0/).
+at 125 ns(5): Note: func: XNOR (/escomips_test/escomips0/control0/control_funcode0/).
+at 250 ns: Note: --- CLOCKS LEFT: 9 (/escomips_test/).
+at 250 ns: Note: --- INSTR: 0000100010000000000000111 (/escomips_test/).
+at 250 ns: Note: --- MICRO: WR ALUOP(0000)  (/escomips_test/).
+at 375 ns(1): Note: PC[0]++ = 2 (/escomips_test/escomips0/stack0/).
+at 375 ns(1): Note: write reg[1] = 7 (/escomips_test/escomips0/register_file0/).
+at 375 ns(1): Note: read reg[0] = 1, reg[0] = 1 (/escomips_test/escomips0/register_file0/).
+at 375 ns(1): Note: read mem[1] = 0 (/escomips_test/escomips0/data_memory0/).
+at 375 ns(5): Note: func:  ADD (/escomips_test/escomips0/control0/control_funcode0/).
+at 375 ns(6): Note: op:   CMP (/escomips_test/escomips0/control0/control_opcode0/).
+at 500 ns: Note: --- CLOCKS LEFT: 8 (/escomips_test/).
+at 500 ns: Note: --- INSTR: 0000000010001000000000000 (/escomips_test/).
+at 500 ns: Note: --- MICRO: MUX_SWD WR ALUOP(0011) MUX_SR LF  (/escomips_test/).
+at 625 ns(1): Note: PC[0]++ = 3 (/escomips_test/escomips0/stack0/).
+at 625 ns(1): Note: write reg[1] = 8 (/escomips_test/escomips0/register_file0/).
+at 625 ns(1): Note: read reg[1] = 7, reg[0] = 1 (/escomips_test/escomips0/register_file0/).
+at 625 ns(1): Note: read mem[8] = 0 (/escomips_test/escomips0/data_memory0/).
+at 625 ns(5): Note: func: NAND (/escomips_test/escomips0/control0/control_funcode0/).
+at 625 ns(7): Note: Normal instruction... (/escomips_test/escomips0/control0/control_asm0/).
+at 625 ns(10): Note: op:   SWI (/escomips_test/escomips0/control0/control_opcode0/).
+at 750 ns: Note: --- CLOCKS LEFT: 7 (/escomips_test/).
+at 750 ns: Note: --- INSTR: 0001100010000000000000101 (/escomips_test/).
+at 750 ns: Note: --- MICRO: MUX_SR2 ALUOP(0000) MUX_SDMD WD  (/escomips_test/).
+at 875 ns(1): Note: PC[0]++ = 4 (/escomips_test/escomips0/stack0/).
+at 875 ns(1): Note: read reg[0] = 1, reg[1] = 8 (/escomips_test/escomips0/register_file0/).
+at 875 ns(1): Note: write mem[5] = 8 (/escomips_test/escomips0/data_memory0/).
+at 875 ns(1): Note: read mem[5] = 0 (/escomips_test/escomips0/data_memory0/).
+at 875 ns(5): Note: func:  AND (/escomips_test/escomips0/control0/control_funcode0/).
+at 875 ns(6): Note: op:     B (/escomips_test/escomips0/control0/control_opcode0/).
+at 1 us: Note: --- CLOCKS LEFT: 6 (/escomips_test/).
+at 1 us: Note: --- INSTR: 1001100000000000000000010 (/escomips_test/).
+at 1 us: Note: --- MICRO: WPC ALUOP(0000)  (/escomips_test/).
+at 1125 ns(1): Note: PC[0] = 2 (/escomips_test/escomips0/stack0/).
+at 1125 ns(1): Note: read reg[0] = 1, reg[0] = 1 (/escomips_test/escomips0/register_file0/).
+at 1125 ns(1): Note: read mem[1] = 0 (/escomips_test/escomips0/data_memory0/).
+at 1125 ns(5): Note: func:  ADD (/escomips_test/escomips0/control0/control_funcode0/).
+at 1125 ns(6): Note: op:   CMP (/escomips_test/escomips0/control0/control_opcode0/).
+at 1250 ns: Note: --- CLOCKS LEFT: 5 (/escomips_test/).
+at 1250 ns: Note: --- INSTR: 0000000010001000000000000 (/escomips_test/).
+at 1250 ns: Note: --- MICRO: MUX_SWD WR ALUOP(0011) MUX_SR LF  (/escomips_test/).
+at 1375 ns(1): Note: PC[0]++ = 3 (/escomips_test/escomips0/stack0/).
+at 1375 ns(1): Note: write reg[1] = 9 (/escomips_test/escomips0/register_file0/).
+at 1375 ns(1): Note: read reg[1] = 8, reg[0] = 1 (/escomips_test/escomips0/register_file0/).
+at 1375 ns(1): Note: read mem[9] = 0 (/escomips_test/escomips0/data_memory0/).
+at 1375 ns(5): Note: func: NAND (/escomips_test/escomips0/control0/control_funcode0/).
+at 1375 ns(7): Note: Normal instruction... (/escomips_test/escomips0/control0/control_asm0/).
+at 1375 ns(10): Note: op:   SWI (/escomips_test/escomips0/control0/control_opcode0/).
+at 1500 ns: Note: --- CLOCKS LEFT: 4 (/escomips_test/).
+at 1500 ns: Note: --- INSTR: 0001100010000000000000101 (/escomips_test/).
+at 1500 ns: Note: --- MICRO: MUX_SR2 ALUOP(0000) MUX_SDMD WD  (/escomips_test/).
+at 1625 ns(1): Note: PC[0]++ = 4 (/escomips_test/escomips0/stack0/).
+at 1625 ns(1): Note: read reg[0] = 1, reg[1] = 9 (/escomips_test/escomips0/register_file0/).
+at 1625 ns(1): Note: write mem[5] = 9 (/escomips_test/escomips0/data_memory0/).
+at 1625 ns(1): Note: read mem[5] = 8 (/escomips_test/escomips0/data_memory0/).
+at 1625 ns(5): Note: func:  AND (/escomips_test/escomips0/control0/control_funcode0/).
+at 1625 ns(6): Note: op:     B (/escomips_test/escomips0/control0/control_opcode0/).
+at 1750 ns: Note: --- CLOCKS LEFT: 3 (/escomips_test/).
+at 1750 ns: Note: --- INSTR: 1001100000000000000000010 (/escomips_test/).
+at 1750 ns: Note: --- MICRO: WPC ALUOP(0000)  (/escomips_test/).
+at 1875 ns(1): Note: PC[0] = 2 (/escomips_test/escomips0/stack0/).
+at 1875 ns(1): Note: read reg[0] = 1, reg[0] = 1 (/escomips_test/escomips0/register_file0/).
+at 1875 ns(1): Note: read mem[1] = 0 (/escomips_test/escomips0/data_memory0/).
+at 1875 ns(5): Note: func:  ADD (/escomips_test/escomips0/control0/control_funcode0/).
+at 1875 ns(6): Note: op:   CMP (/escomips_test/escomips0/control0/control_opcode0/).
+at 2 us: Note: --- CLOCKS LEFT: 2 (/escomips_test/).
+at 2 us: Note: --- INSTR: 0000000010001000000000000 (/escomips_test/).
+at 2 us: Note: --- MICRO: MUX_SWD WR ALUOP(0011) MUX_SR LF  (/escomips_test/).
+at 2125 ns(1): Note: PC[0]++ = 3 (/escomips_test/escomips0/stack0/).
+at 2125 ns(1): Note: write reg[1] = 10 (/escomips_test/escomips0/register_file0/).
+at 2125 ns(1): Note: read reg[1] = 9, reg[0] = 1 (/escomips_test/escomips0/register_file0/).
+at 2125 ns(1): Note: read mem[10] = 0 (/escomips_test/escomips0/data_memory0/).
+at 2125 ns(5): Note: func: NAND (/escomips_test/escomips0/control0/control_funcode0/).
+at 2125 ns(7): Note: Normal instruction... (/escomips_test/escomips0/control0/control_asm0/).
+at 2125 ns(10): Note: op:   SWI (/escomips_test/escomips0/control0/control_opcode0/).
+at 2250 ns: Note: --- CLOCKS LEFT: 1 (/escomips_test/).
+at 2250 ns: Note: --- INSTR: 0001100010000000000000101 (/escomips_test/).
+at 2250 ns: Note: --- MICRO: MUX_SR2 ALUOP(0000) MUX_SDMD WD  (/escomips_test/).
+at 2375 ns(1): Note: PC[0]++ = 4 (/escomips_test/escomips0/stack0/).
+at 2375 ns(1): Note: read reg[0] = 1, reg[1] = 10 (/escomips_test/escomips0/register_file0/).
+at 2375 ns(1): Note: write mem[5] = 10 (/escomips_test/escomips0/data_memory0/).
+at 2375 ns(1): Note: read mem[5] = 9 (/escomips_test/escomips0/data_memory0/).
+at 2375 ns(5): Note: func:  AND (/escomips_test/escomips0/control0/control_funcode0/).
+at 2375 ns(6): Note: op:     B (/escomips_test/escomips0/control0/control_opcode0/).
+at 2500 ns: Note: --- CLOCKS LEFT: 0 (/escomips_test/).
+at 2500 ns: Note: --- INSTR: 1001100000000000000000010 (/escomips_test/).
+at 2500 ns: Note: --- MICRO: WPC ALUOP(0000)  (/escomips_test/).
+at 2500 ns: Note: Waiting 10 clocks (/escomips_test/).
+at 2625 ns(1): Note: PC[0] = 2 (/escomips_test/escomips0/stack0/).
+at 2625 ns(1): Note: read reg[0] = 1, reg[0] = 1 (/escomips_test/escomips0/register_file0/).
+at 2625 ns(1): Note: read mem[1] = 0 (/escomips_test/escomips0/data_memory0/).
+at 2625 ns(5): Note: func:  ADD (/escomips_test/escomips0/control0/control_funcode0/).
+at 2625 ns(6): Note: op:   CMP (/escomips_test/escomips0/control0/control_opcode0/).
+at 2750 ns: Note: --- CLOCKS LEFT: 9 (/escomips_test/).
+at 2750 ns: Note: --- INSTR: 0000000010001000000000000 (/escomips_test/).
+at 2750 ns: Note: --- MICRO: MUX_SWD WR ALUOP(0011) MUX_SR LF  (/escomips_test/).
+at 2875 ns(1): Note: PC[0]++ = 3 (/escomips_test/escomips0/stack0/).
+at 2875 ns(1): Note: write reg[1] = 11 (/escomips_test/escomips0/register_file0/).
+at 2875 ns(1): Note: read reg[1] = 10, reg[0] = 1 (/escomips_test/escomips0/register_file0/).
+at 2875 ns(1): Note: read mem[11] = 0 (/escomips_test/escomips0/data_memory0/).
+at 2875 ns(5): Note: func: NAND (/escomips_test/escomips0/control0/control_funcode0/).
+at 2875 ns(7): Note: Normal instruction... (/escomips_test/escomips0/control0/control_asm0/).
+at 2875 ns(10): Note: op:   SWI (/escomips_test/escomips0/control0/control_opcode0/).
+at 3 us: Note: --- CLOCKS LEFT: 8 (/escomips_test/).
+at 3 us: Note: --- INSTR: 0001100010000000000000101 (/escomips_test/).
+at 3 us: Note: --- MICRO: MUX_SR2 ALUOP(0000) MUX_SDMD WD  (/escomips_test/).
+at 3125 ns(1): Note: PC[0]++ = 4 (/escomips_test/escomips0/stack0/).
+at 3125 ns(1): Note: read reg[0] = 1, reg[1] = 11 (/escomips_test/escomips0/register_file0/).
+at 3125 ns(1): Note: write mem[5] = 11 (/escomips_test/escomips0/data_memory0/).
+at 3125 ns(1): Note: read mem[5] = 10 (/escomips_test/escomips0/data_memory0/).
+at 3125 ns(5): Note: func:  AND (/escomips_test/escomips0/control0/control_funcode0/).
+at 3125 ns(6): Note: op:     B (/escomips_test/escomips0/control0/control_opcode0/).
+at 3250 ns: Note: --- CLOCKS LEFT: 7 (/escomips_test/).
+at 3250 ns: Note: --- INSTR: 1001100000000000000000010 (/escomips_test/).
+at 3250 ns: Note: --- MICRO: WPC ALUOP(0000)  (/escomips_test/).
+at 3375 ns(1): Note: PC[0] = 2 (/escomips_test/escomips0/stack0/).
+at 3375 ns(1): Note: read reg[0] = 1, reg[0] = 1 (/escomips_test/escomips0/register_file0/).
+at 3375 ns(1): Note: read mem[1] = 0 (/escomips_test/escomips0/data_memory0/).
+at 3375 ns(5): Note: func:  ADD (/escomips_test/escomips0/control0/control_funcode0/).
+at 3375 ns(6): Note: op:   CMP (/escomips_test/escomips0/control0/control_opcode0/).
+at 3500 ns: Note: --- CLOCKS LEFT: 6 (/escomips_test/).
+at 3500 ns: Note: --- INSTR: 0000000010001000000000000 (/escomips_test/).
+at 3500 ns: Note: --- MICRO: MUX_SWD WR ALUOP(0011) MUX_SR LF  (/escomips_test/).
+at 3625 ns(1): Note: PC[0]++ = 3 (/escomips_test/escomips0/stack0/).
+at 3625 ns(1): Note: write reg[1] = 12 (/escomips_test/escomips0/register_file0/).
+at 3625 ns(1): Note: read reg[1] = 11, reg[0] = 1 (/escomips_test/escomips0/register_file0/).
+at 3625 ns(1): Note: read mem[12] = 0 (/escomips_test/escomips0/data_memory0/).
+at 3625 ns(5): Note: func: NAND (/escomips_test/escomips0/control0/control_funcode0/).
+at 3625 ns(7): Note: Normal instruction... (/escomips_test/escomips0/control0/control_asm0/).
+at 3625 ns(10): Note: op:   SWI (/escomips_test/escomips0/control0/control_opcode0/).
+at 3750 ns: Note: --- CLOCKS LEFT: 5 (/escomips_test/).
+at 3750 ns: Note: --- INSTR: 0001100010000000000000101 (/escomips_test/).
+at 3750 ns: Note: --- MICRO: MUX_SR2 ALUOP(0000) MUX_SDMD WD  (/escomips_test/).
+at 3875 ns(1): Note: PC[0]++ = 4 (/escomips_test/escomips0/stack0/).
+at 3875 ns(1): Note: read reg[0] = 1, reg[1] = 12 (/escomips_test/escomips0/register_file0/).
+at 3875 ns(1): Note: write mem[5] = 12 (/escomips_test/escomips0/data_memory0/).
+at 3875 ns(1): Note: read mem[5] = 11 (/escomips_test/escomips0/data_memory0/).
+at 3875 ns(5): Note: func:  AND (/escomips_test/escomips0/control0/control_funcode0/).
+at 3875 ns(6): Note: op:     B (/escomips_test/escomips0/control0/control_opcode0/).
+at 4 us: Note: --- CLOCKS LEFT: 4 (/escomips_test/).
+at 4 us: Note: --- INSTR: 1001100000000000000000010 (/escomips_test/).
+at 4 us: Note: --- MICRO: WPC ALUOP(0000)  (/escomips_test/).
+at 4125 ns(1): Note: PC[0] = 2 (/escomips_test/escomips0/stack0/).
+at 4125 ns(1): Note: read reg[0] = 1, reg[0] = 1 (/escomips_test/escomips0/register_file0/).
+at 4125 ns(1): Note: read mem[1] = 0 (/escomips_test/escomips0/data_memory0/).
+at 4125 ns(5): Note: func:  ADD (/escomips_test/escomips0/control0/control_funcode0/).
+at 4125 ns(6): Note: op:   CMP (/escomips_test/escomips0/control0/control_opcode0/).
+at 4250 ns: Note: --- CLOCKS LEFT: 3 (/escomips_test/).
+at 4250 ns: Note: --- INSTR: 0000000010001000000000000 (/escomips_test/).
+at 4250 ns: Note: --- MICRO: MUX_SWD WR ALUOP(0011) MUX_SR LF  (/escomips_test/).
+at 4375 ns(1): Note: PC[0]++ = 3 (/escomips_test/escomips0/stack0/).
+at 4375 ns(1): Note: write reg[1] = 13 (/escomips_test/escomips0/register_file0/).
+at 4375 ns(1): Note: read reg[1] = 12, reg[0] = 1 (/escomips_test/escomips0/register_file0/).
+at 4375 ns(1): Note: read mem[13] = 0 (/escomips_test/escomips0/data_memory0/).
+at 4375 ns(5): Note: func: NAND (/escomips_test/escomips0/control0/control_funcode0/).
+at 4375 ns(7): Note: Normal instruction... (/escomips_test/escomips0/control0/control_asm0/).
+at 4375 ns(10): Note: op:   SWI (/escomips_test/escomips0/control0/control_opcode0/).
+at 4500 ns: Note: --- CLOCKS LEFT: 2 (/escomips_test/).
+at 4500 ns: Note: --- INSTR: 0001100010000000000000101 (/escomips_test/).
+at 4500 ns: Note: --- MICRO: MUX_SR2 ALUOP(0000) MUX_SDMD WD  (/escomips_test/).
+at 4625 ns(1): Note: PC[0]++ = 4 (/escomips_test/escomips0/stack0/).
+at 4625 ns(1): Note: read reg[0] = 1, reg[1] = 13 (/escomips_test/escomips0/register_file0/).
+at 4625 ns(1): Note: write mem[5] = 13 (/escomips_test/escomips0/data_memory0/).
+at 4625 ns(1): Note: read mem[5] = 12 (/escomips_test/escomips0/data_memory0/).
+at 4625 ns(5): Note: func:  AND (/escomips_test/escomips0/control0/control_funcode0/).
+at 4625 ns(6): Note: op:     B (/escomips_test/escomips0/control0/control_opcode0/).
+at 4750 ns: Note: --- CLOCKS LEFT: 1 (/escomips_test/).
+at 4750 ns: Note: --- INSTR: 1001100000000000000000010 (/escomips_test/).
+at 4750 ns: Note: --- MICRO: WPC ALUOP(0000)  (/escomips_test/).
+at 4875 ns(1): Note: PC[0] = 2 (/escomips_test/escomips0/stack0/).
+at 4875 ns(1): Note: read reg[0] = 1, reg[0] = 1 (/escomips_test/escomips0/register_file0/).
+at 4875 ns(1): Note: read mem[1] = 0 (/escomips_test/escomips0/data_memory0/).
+at 4875 ns(5): Note: func:  ADD (/escomips_test/escomips0/control0/control_funcode0/).
+at 4875 ns(6): Note: op:   CMP (/escomips_test/escomips0/control0/control_opcode0/).
+at 5 us: Note: --- CLOCKS LEFT: 0 (/escomips_test/).
+at 5 us: Note: --- INSTR: 0000000010001000000000000 (/escomips_test/).
+at 5 us: Note: --- MICRO: MUX_SWD WR ALUOP(0011) MUX_SR LF  (/escomips_test/).
+# quit

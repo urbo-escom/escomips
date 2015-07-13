@@ -1,0 +1,221 @@
+# format:
+#
+#     instr    Rd            lit16
+#         0     0     0     0     0     0
+#
+#     instr    Rd    Rt         lit12
+#         0     0     0     0     0     0
+#
+#     instr    Rd    Rt   Rs      -  lit4
+#         0     0     0     0     0     0
+#
+#     instr     -            lit16
+#         0     0     0     0     0     0
+#
+#     clocks
+#          0
+
+
+# Waiting 10 clocks
+
+# clocks left 9
+    => instr: 1 0001 0000 0000 0000 0111
+    => micro: WR ALUOP(0000) 
+    => pc(next): 1
+    => reg1: 1
+    => reg2: 1
+    => alu: 1
+    => mem: 0
+    => flags 0000
+
+# clocks left 8
+    => instr: 0 0001 0001 0000 0000 0000
+    => micro: MUX_SWD WR ALUOP(0011) MUX_SR LF 
+    => pc(next): 2
+    => reg1: 7
+    => reg2: 1
+    => alu: 8
+    => mem: 0
+    => flags 0000
+
+# clocks left 7
+    => instr: 3 0001 0000 0000 0000 0101
+    => micro: MUX_SR2 ALUOP(0000) MUX_SDMD WD 
+    => pc(next): 3
+    => reg1: 1
+    => reg2: 8
+    => alu: 0
+    => mem: 0
+    => flags 0001
+
+# clocks left 6
+    => instr: 19 0000 0000 0000 0000 0010
+    => micro: WPC ALUOP(0000) 
+    => pc(next): 4
+    => reg1: 1
+    => reg2: 1
+    => alu: 1
+    => mem: 0
+    => flags 0000
+
+# clocks left 5
+    => instr: 0 0001 0001 0000 0000 0000
+    => micro: MUX_SWD WR ALUOP(0011) MUX_SR LF 
+    => pc(next): 2
+    => reg1: 8
+    => reg2: 1
+    => alu: 9
+    => mem: 0
+    => flags 0000
+
+# clocks left 4
+    => instr: 3 0001 0000 0000 0000 0101
+    => micro: MUX_SR2 ALUOP(0000) MUX_SDMD WD 
+    => pc(next): 3
+    => reg1: 1
+    => reg2: 9
+    => alu: 1
+    => mem: 0
+    => flags 0000
+
+# clocks left 3
+    => instr: 19 0000 0000 0000 0000 0010
+    => micro: WPC ALUOP(0000) 
+    => pc(next): 4
+    => reg1: 1
+    => reg2: 1
+    => alu: 1
+    => mem: 8
+    => flags 0000
+
+# clocks left 2
+    => instr: 0 0001 0001 0000 0000 0000
+    => micro: MUX_SWD WR ALUOP(0011) MUX_SR LF 
+    => pc(next): 2
+    => reg1: 9
+    => reg2: 1
+    => alu: 10
+    => mem: 0
+    => flags 0000
+
+# clocks left 1
+    => instr: 3 0001 0000 0000 0000 0101
+    => micro: MUX_SR2 ALUOP(0000) MUX_SDMD WD 
+    => pc(next): 3
+    => reg1: 1
+    => reg2: 10
+    => alu: 0
+    => mem: 0
+    => flags 0001
+
+# clocks left 0
+    => instr: 19 0000 0000 0000 0000 0010
+    => micro: WPC ALUOP(0000) 
+    => pc(next): 4
+    => reg1: 1
+    => reg2: 1
+    => alu: 1
+    => mem: 9
+    => flags 0000
+
+# Waiting 10 clocks
+
+# clocks left 9
+    => instr: 0 0001 0001 0000 0000 0000
+    => micro: MUX_SWD WR ALUOP(0011) MUX_SR LF 
+    => pc(next): 2
+    => reg1: 10
+    => reg2: 1
+    => alu: 11
+    => mem: 0
+    => flags 0000
+
+# clocks left 8
+    => instr: 3 0001 0000 0000 0000 0101
+    => micro: MUX_SR2 ALUOP(0000) MUX_SDMD WD 
+    => pc(next): 3
+    => reg1: 1
+    => reg2: 11
+    => alu: 1
+    => mem: 0
+    => flags 0000
+
+# clocks left 7
+    => instr: 19 0000 0000 0000 0000 0010
+    => micro: WPC ALUOP(0000) 
+    => pc(next): 4
+    => reg1: 1
+    => reg2: 1
+    => alu: 1
+    => mem: 10
+    => flags 0000
+
+# clocks left 6
+    => instr: 0 0001 0001 0000 0000 0000
+    => micro: MUX_SWD WR ALUOP(0011) MUX_SR LF 
+    => pc(next): 2
+    => reg1: 11
+    => reg2: 1
+    => alu: 12
+    => mem: 0
+    => flags 0000
+
+# clocks left 5
+    => instr: 3 0001 0000 0000 0000 0101
+    => micro: MUX_SR2 ALUOP(0000) MUX_SDMD WD 
+    => pc(next): 3
+    => reg1: 1
+    => reg2: 12
+    => alu: 0
+    => mem: 0
+    => flags 0001
+
+# clocks left 4
+    => instr: 19 0000 0000 0000 0000 0010
+    => micro: WPC ALUOP(0000) 
+    => pc(next): 4
+    => reg1: 1
+    => reg2: 1
+    => alu: 1
+    => mem: 11
+    => flags 0000
+
+# clocks left 3
+    => instr: 0 0001 0001 0000 0000 0000
+    => micro: MUX_SWD WR ALUOP(0011) MUX_SR LF 
+    => pc(next): 2
+    => reg1: 12
+    => reg2: 1
+    => alu: 13
+    => mem: 0
+    => flags 0000
+
+# clocks left 2
+    => instr: 3 0001 0000 0000 0000 0101
+    => micro: MUX_SR2 ALUOP(0000) MUX_SDMD WD 
+    => pc(next): 3
+    => reg1: 1
+    => reg2: 13
+    => alu: 1
+    => mem: 0
+    => flags 0000
+
+# clocks left 1
+    => instr: 19 0000 0000 0000 0000 0010
+    => micro: WPC ALUOP(0000) 
+    => pc(next): 4
+    => reg1: 1
+    => reg2: 1
+    => alu: 1
+    => mem: 12
+    => flags 0000
+
+# clocks left 0
+    => instr: 0 0001 0001 0000 0000 0000
+    => micro: MUX_SWD WR ALUOP(0011) MUX_SR LF 
+    => pc(next): 2
+    => reg1: 13
+    => reg2: 1
+    => alu: 14
+    => mem: 0
+    => flags 0000
