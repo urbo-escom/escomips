@@ -1,0 +1,3 @@
+vhdl work ../../../src/09_microinstr/microinstr-arch.vhdl
+vhdl work ../../../src/09_microinstr/microinstr-test.vhdl
+vhdl work ../../../src/00_util/util-arch.vhdl
