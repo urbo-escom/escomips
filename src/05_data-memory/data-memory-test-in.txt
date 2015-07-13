@@ -1,0 +1,11 @@
+# format:
+#     addr  data_in  write/~read  | data_out
+#      hex    hex        bit      |    hex
+
+      0x40   0x1234       1
+      0x42   0x9876       1
+      0x44   0x2233       1
+
+      0x44   0x0000       0
+      0x42   0x0000       0
+      0x40   0x0000       0
