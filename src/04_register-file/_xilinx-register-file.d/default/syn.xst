@@ -1,0 +1,13 @@
+
+run
+-ifn syn.prj
+-ifmt mixed
+-top register_file
+-ofn syn.ngc
+-ofmt ngc
+-rtlview Yes
+-p xc7a100t-1-csg324
+-opt_mode Speed
+-opt_level 1
+-fsm_style LUT
+-bus_delimiter []
