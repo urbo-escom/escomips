@@ -1,0 +1,18 @@
+net a[1] loc="T5";
+net a[0] loc="V8";
+
+net b[1] loc="U8";
+net b[0] loc="N8";
+
+net op[3] loc="M8";
+net op[2] loc="V9";
+net op[1] loc="T9";
+net op[0] loc="T10";
+
+net s[1] loc="N11";
+net s[0] loc="M11";
+
+net flags[3] loc="V15";
+net flags[2] loc="U15";
+net flags[1] loc="V16";
+net flags[0] loc="U16";

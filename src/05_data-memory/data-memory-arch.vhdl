@@ -2,6 +2,7 @@ library ieee;
 	use ieee.std_logic_1164.all;
 
 library work;
+	use work.math.log;
 	use work.conv.int2str;
 	use work.conv.uint;
 	use work.conv.int;
@@ -10,13 +11,13 @@ library work;
 entity data_memory is
 	generic (
 		debug: boolean := false;
-		addr_width: positive := 11;
-		data_width: positive := 16
+		mem_size: positive := 8;
+		data_width: positive := 4
 	);
 	port (
 		clk: in std_logic;
 		wr: in std_logic;
-		a: in std_logic_vector(addr_width-1 downto 0);
+		a: in std_logic_vector(log(mem_size, 2)-1 downto 0);
 		di: in std_logic_vector(data_width-1 downto 0);
 		do: out std_logic_vector(data_width-1 downto 0)
 	);
@@ -24,7 +25,7 @@ end entity data_memory;
 
 
 architecture data_memory_arch of data_memory is
-	type mem is array (0 to (2**addr_width)-1) of
+	type mem is array (0 to mem_size-1) of
 		std_logic_vector(data_width-1 downto 0);
 	signal ram: mem := (others => (others => '0'));
 begin

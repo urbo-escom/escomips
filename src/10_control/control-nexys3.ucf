@@ -1,0 +1,40 @@
+net "clk" loc = "V10";
+
+net "opcode[3]" loc="T5";
+net "opcode[2]" loc="V8";
+net "opcode[1]" loc="U8";
+net "opcode[0]" loc="N8";
+
+net "funcode[3]" loc="M8";
+net "funcode[2]" loc="V9";
+net "funcode[1]" loc="T9";
+net "funcode[0]" loc="T10";
+
+net "lf"       loc="A8";
+net "flags[3]" loc="C4";
+net "flags[2]" loc="B8";
+net "flags[1]" loc="D9";
+net "flags[0]" loc="C9";
+
+net "microcode[19]" loc="T17";
+net "microcode[18]" loc="T18";
+net "microcode[17]" loc="U17";
+net "microcode[16]" loc="U18";
+net "microcode[15]" loc="M14";
+net "microcode[14]" loc="N14";
+net "microcode[13]" loc="L14";
+net "microcode[12]" loc="M13";
+
+net "microcode[11]" loc="N16";
+net "microcode[10]" loc="N15";
+net  "microcode[9]" loc="P18";
+net  "microcode[8]" loc="P17";
+
+net "microcode[7]" loc="T11";
+net "microcode[6]" loc="R11";
+net "microcode[5]" loc="N11";
+net "microcode[4]" loc="M11";
+net "microcode[3]" loc="V15";
+net "microcode[2]" loc="U15";
+net "microcode[1]" loc="V16";
+net "microcode[0]" loc="U16";

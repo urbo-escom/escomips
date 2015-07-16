@@ -108,8 +108,8 @@ BIT  := bitgen
 
 override FUSE_OPT += -incremental
 override FUSE_OPT += -timeprecision_vhdl 1ns
-override MAP_OPT  += -logic_opt off -ntd -ol std
-override PAR_OPT  += -ntd -ol std
+override MAP_OPT  +=
+override PAR_OPT  +=
 
 ifdef TRACK_TIME
 FUSE := time fuse
@@ -122,7 +122,8 @@ endif
 
 
 units :=
-blacklist :=
+blacklist_sim :=
+blacklist_syn :=
 
 
 ###################################
@@ -132,7 +133,7 @@ blacklist :=
 u := util
 $u-dep +=
 units += $u
-blacklist += $u
+blacklist_syn += $u
 
 
 ###################################
@@ -216,6 +217,7 @@ units += $u
 u := microinstr
 $u-dep += util
 units += $u
+blacklist_syn += $u
 
 
 ###################################
@@ -241,13 +243,17 @@ units += $u
 
 u := escomips
 $u-dep += util
-$u-dep += dir-ext
-$u-dep += sign-ext
-$u-dep += alu           ${alu-dep}
-$u-dep += register-file ${register-file-dep}
-$u-dep += data-memory   ${data-memory-dep}
-$u-dep += stack         ${stack-dep}
-$u-dep += control       ${control-dep}
+$u-dep += alu            ${alu-dep}
+$u-dep += register-file  ${register-file-dep}
+$u-dep += data-memory    ${data-memory-dep}
+$u-dep += program-memory ${program-memory-dep}
+$u-dep += stack          ${stack-dep}
+$u-dep += control        ${control-dep}
+units += $u
+
+u := escomips-program00
+$u-dep += util
+$u-dep += escomips ${escomips-dep}
 units += $u
 
 
@@ -297,6 +303,7 @@ $(eval sim/$u: $p/$u-test-out.txt)
 $(eval .PHONY: clean/sim/$u)
 $(eval clean/sim/$u:: ; $$(call rmdir, $d/)             || $$(call true))
 $(eval clean/sim/$u:: ; $$(call rm, $p/$u-test-out.txt) || $$(call true))
+$(eval clean/sim/$u:: ; $$(call rm, $p/$u-test.png)     || $$(call true))
 $(eval .PHONY: clean/all/$u)
 $(eval clean/all/$u: clean/sim/$u)
 
@@ -399,6 +406,10 @@ $(eval LIST_CLEAN += clean/html/$u-$n)
 $(eval all-doc: html/$u-$n)
 $(eval .PHONY: html/$u-$n)
 $(eval html/$u-$n: $p/$u-$n.html)
+$(eval clean/html/$u-$n:: ; $$(call rm, $p/$u-$n.html) || $$(call true))
+$(eval clean/html/$u-$n:: ; $$(call rm, $p/prism.css) || $$(call true))
+$(eval clean/html/$u-$n:: ; $$(call rm, $p/prism.js) || $$(call true))
+$(eval clean/all/$u: clean/html/$u-$n)
 
 $(eval $p/$u-$n.html: sim/$u rtl/$u-$n syn/$u-$n)
 
@@ -418,34 +429,33 @@ $(eval $p/$u-$n.html: $d/$n/syn.mrp)
 $(eval $p/$u-$n.html: $d/$n/syn-routed.par)
 $(eval $p/$u-$n.html: $d/$n/syn.bgn)
 
-$(eval $p/$u-$n.html:     VHDL  += $(filter-out %$u-arch.vhdl, ${$u-src}))
-$(eval $p/$u-$n.html:     VHDL  += $(filter-out %$u-test.vhdl, ${$u-src}))
-$(eval $p/$u-$n.html:     VHDL  += $(sort ${VHDL}))
-$(eval $p/$u-$n.html: VHDL_TOP  := $(filter %$u-arch.vhdl, ${$u-src}))
+$(eval $p/$u-$n.html:  VHDL_TOP := $(filter %$u-arch.vhdl, ${$u-src}))
 $(eval $p/$u-$n.html: VHDL_TEST := $(filter %$u-test.vhdl, ${$u-src}))
-$(eval $p/$u-$n.html:  TEST_IN  := $p/$u-test-in.txt)
-$(eval $p/$u-$n.html: TEST_OUT  := $p/$u-test-out.txt)
-$(eval $p/$u-$n.html:   SIMPNG  := $p/$u-test.png)
-$(eval $p/$u-$n.html:   PINOUT  := $p/$u-$n-pinout.png)
-$(eval $p/$u-$n.html:   SCHEMA  := $p/$u-$n-schema.png)
-$(eval $p/$u-$n.html:      UCF  := $p/$u-$n.ucf)
-$(eval $p/$u-$n.html: FUSE_LOG  := $d/fuse.log)
-$(eval $p/$u-$n.html: ISIM_LOG  := $d/isim.log)
-$(eval $p/$u-$n.html:  XST_LOG  := $d/$n/syn.srp)
-$(eval $p/$u-$n.html:  NGD_LOG  := $d/$n/syn.bld)
-$(eval $p/$u-$n.html:  MAP_LOG  := $d/$n/syn.map)
-$(eval $p/$u-$n.html:  MRP_LOG  := $d/$n/syn.mrp)
-$(eval $p/$u-$n.html:  PAR_LOG  := $d/$n/syn-routed.par)
-$(eval $p/$u-$n.html:  BIT_LOG  := $d/$n/syn.bgn)
-
-$(eval clean/html/$u-$n:: ; $$(call rm, $p/$u-$n.html) || $$(call true))
+$(eval $p/$u-$n.html:      VHDL := $(filter-out \
+					%$u-arch.vhdl \
+					%$u-test.vhdl, \
+					${$u-src}))
+$(eval $p/$u-$n.html:   TEST_IN := $p/$u-test-in.txt)
+$(eval $p/$u-$n.html:  TEST_OUT := $p/$u-test-out.txt)
+$(eval $p/$u-$n.html:    SIMPNG := $p/$u-test.png)
+$(eval $p/$u-$n.html:    PINOUT := $p/$u-$n-pinout.png)
+$(eval $p/$u-$n.html:    SCHEMA := $p/$u-$n-schema.png)
+$(eval $p/$u-$n.html:       UCF := $p/$u-$n.ucf)
+$(eval $p/$u-$n.html:  FUSE_LOG := $d/fuse.log)
+$(eval $p/$u-$n.html:  ISIM_LOG := $d/isim.log)
+$(eval $p/$u-$n.html:   XST_LOG := $d/$n/syn.srp)
+$(eval $p/$u-$n.html:   NGD_LOG := $d/$n/syn.bld)
+$(eval $p/$u-$n.html:   MAP_LOG := $d/$n/syn.map)
+$(eval $p/$u-$n.html:   MRP_LOG := $d/$n/syn.mrp)
+$(eval $p/$u-$n.html:   PAR_LOG := $d/$n/syn-routed.par)
+$(eval $p/$u-$n.html:   BIT_LOG := $d/$n/syn.bgn)
 
 endef
 
 
 $(foreach u, ${units}, $(eval $u-dep := $(sort ${$u-dep})))
-$(foreach u, ${units}, $(eval ${VHDL_SIM}))
-$(foreach u, $(filter-out ${blacklist}, ${units}), \
+$(foreach u, $(filter-out ${blacklist_sim}, ${units}), $(eval ${VHDL_SIM}))
+$(foreach u, $(filter-out ${blacklist_syn}, ${units}), \
 	$(foreach ucf, $(call vhdl_src, ${u}-nexys3.ucf), \
 		$(eval $u-ucf := ${ucf}) \
 		$(eval dev_name := nexys3) \

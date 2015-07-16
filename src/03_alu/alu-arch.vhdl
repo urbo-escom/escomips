@@ -48,7 +48,7 @@ library work;
 entity alu is
 	generic (
 		debug: boolean := false;
-		size: positive := 4
+		size: positive := 2
 	);
 	port (
 		a: in std_logic_vector(size-1 downto 0);

@@ -53,6 +53,57 @@ begin
 end mux2to1_arch;
 
 
+--------------------------
+-- A clock divisor -------
+--------------------------
+
+
+library ieee;
+	use ieee.std_logic_1164.all;
+	use ieee.numeric_std.all;
+
+library work;
+
+
+entity clock_divisor is
+	generic(size: natural);
+	port(
+		clk: in std_logic;
+		q: out std_logic_vector(size-1 downto 0)
+	);
+end clock_divisor;
+
+
+architecture clock_divisor_arch of clock_divisor is
+begin
+	process(clk)
+		variable t: std_logic_vector(size-1 downto 0);
+	begin
+		if (rising_edge(clk)) then
+			t := std_logic_vector(
+				unsigned(t) + to_unsigned(1, t'length)
+			);
+			q <= t;
+		end if;
+	end process;
+end clock_divisor_arch;
+
+
+---------------------
+-- Types ------------
+---------------------
+
+library ieee;
+	use ieee.std_logic_1164.all;
+
+package types is
+
+	type slv25_arr_t is
+		array (natural range<>) of std_logic_vector(24 downto 0);
+
+end;
+
+
 ---------------------
 -- Math functions ---
 ---------------------

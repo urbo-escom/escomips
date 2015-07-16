@@ -1,0 +1,11 @@
+net "clk" loc="V10";
+net "clr" loc="T10";
+
+net "led[7]" loc="T11";
+net "led[6]" loc="R11";
+net "led[5]" loc="N11";
+net "led[4]" loc="M11";
+net "led[3]" loc="V15";
+net "led[2]" loc="U15";
+net "led[1]" loc="V16";
+net "led[0]" loc="U16";

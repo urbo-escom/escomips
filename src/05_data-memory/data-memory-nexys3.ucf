@@ -1,0 +1,16 @@
+net "clk" loc = "V10";
+
+net "wr"   loc="T5";
+net "a[2]" loc="V8";
+net "a[1]" loc="U8";
+net "a[0]" loc="N8";
+
+net "di[3]" loc="M8";
+net "di[2]" loc="V9";
+net "di[1]" loc="T9";
+net "di[0]" loc="T10";
+
+net "do[3]" loc="T11";
+net "do[2]" loc="R11";
+net "do[1]" loc="N11";
+net "do[0]" loc="M11";

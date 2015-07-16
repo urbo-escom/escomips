@@ -1,0 +1,2850 @@
+<!doctype html>
+<html lang="es">
+
+<head>
+	<meta charset="utf-8">
+	<title>Report of popcount-arch.vhdl</title>
+	<link href="prism.css" rel="stylesheet">
+	<script src="prism.js"></script>
+</head>
+
+<body>
+
+	<header role="banner">
+		<h1>Report of popcount-arch.vhdl</h1>
+	</header>
+
+	<nav id="nav" role="navigation">
+	<ul>
+<li>Arch <a href="#popcount-arch.vhdl">popcount-arch.vhdl</a></li>
+<li>Test <a href="#popcount-test.vhdl">popcount-test.vhdl</a></li>
+<li>Test input <a href="#popcount-test-in.txt">popcount-test-in.txt</a></li>
+<li>Test output <a href="#popcount-test-out.txt">popcount-test-out.txt</a></li>
+<li>Test waveform <a href="#popcount-test.png">popcount-test.png</a></li>
+<li>Schematic pinout <a href="#popcount-nexys3-pinout.png">popcount-nexys3-pinout.png</a></li>
+<li>Schematic full <a href="#popcount-nexys3-schema.png">popcount-nexys3-schema.png</a></li>
+<li>Pin placement (UCF) <a href="#popcount-nexys3.ucf">popcount-nexys3.ucf</a></li>
+<li>Dependency <a href="#util-arch.vhdl">util-arch.vhdl</a></li>
+<li>Dependency <a href="#bcd2display7-arch.vhdl">bcd2display7-arch.vhdl</a></li>
+<li>Dependency <a href="#counter-arch.vhdl">counter-arch.vhdl</a></li>
+<li>Dependency <a href="#popcount-asm-arch.vhdl">popcount-asm-arch.vhdl</a></li>
+<li>Dependency <a href="#shift-register-arch.vhdl">shift-register-arch.vhdl</a></li>
+<li>Simulation <a href="#sim">log</a>
+	<ul>
+	<li>Compilation <a href="#sim-fuse">fuse.log</a></li>
+	<li>Running     <a href="#sim-isim">isim.log</a></li>
+	</ul>
+</li>
+<li>Synthesis <a href="#syn">log</a>
+	<ul>
+	<li>XST <a href="#syn-xst">syn.srp</a></li>
+	<li>NGD <a href="#syn-ngd">syn.bld</a></li>
+	<li>MAP <a href="#syn-map">syn.map</a></li>
+	<li>MRP <a href="#syn-mrp">syn.mrp</a></li>
+	<li>PAR <a href="#syn-par">syn-routed.par</a></li>
+	<li>BIT <a href="#syn-bit">syn.bgn</a></li>
+	</ul>
+</li>
+	</ul>
+	</nav>
+
+	<section id="sources">
+<article id="popcount-arch.vhdl">
+	<h1>Arch <em>popcount-arch.vhdl</em></h1>
+	<a href="#nav">back to nav</a>
+	<pre><code class="language-vhdl">library std;
+	use std.textio.all;
+library ieee;
+	use ieee.std_logic_1164.all;
+	use ieee.numeric_std.all;
+
+library work;
+	use work.ctype.num_base;
+	use work.conv.str2int;
+	use work.conv.int2str;
+	use work.conv.ustdlv;
+	use work.conv.uint;
+
+
+entity popcount is
+	generic (
+		speed: natural := 25;
+		common_cathode: boolean := false
+	);
+	port (
+		clk: in std_logic;
+		clr: in std_logic;
+		init: in std_logic;
+		d: in std_logic_vector(7 downto 0);
+		a: out std_logic_vector(7 downto 0);
+		display7: out std_logic_vector(6 downto 0)
+	);
+end popcount;
+
+
+architecture popcount_arch of popcount is
+
+	signal clk_div: std_logic_vector(speed-1 downto 0);
+	signal clk_div_d: std_logic_vector(speed-1 downto 0);
+
+	constant size: natural := 8;
+	signal reg_a: std_logic_vector(size-1 downto 0);
+	signal zero: std_logic;
+	signal zero_tmp: std_logic_vector(size-1 downto 0);
+
+	signal count_ld: std_logic;
+	signal count_en: std_logic;
+	signal reg_ld: std_logic;
+	signal reg_en: std_logic;
+	signal dec_en: std_logic;
+
+	constant hyphen: std_logic_vector(6 downto 0) := "0000001";
+	constant hyphen_b: std_logic_vector(6 downto 0) := not "0000001";
+	signal count: std_logic_vector(3 downto 0);
+	signal disp_out: std_logic_vector(6 downto 0);
+
+begin
+
+
+	disp_cc: if common_cathode generate
+		mux0: entity work.mux2to1
+		generic map (size => 7)
+		port map (
+			a => hyphen,
+			b => disp_out,
+			s => dec_en,
+			z => display7
+		);
+	end generate;
+	disp_ca: if not common_cathode generate
+		mux0: entity work.mux2to1
+		generic map (size => 7)
+		port map (
+			a => hyphen_b,
+			b => disp_out,
+			s => dec_en,
+			z => display7
+		);
+	end generate;
+	a <= reg_a;
+
+
+	zero_tmp(0) <= reg_a(0);
+	gen_zero: for i in 1 to size-1 generate
+		zero_tmp(i) <= reg_a(i) or zero_tmp(i-1);
+	end generate gen_zero;
+	zero <= not zero_tmp(size-1);
+
+
+	clk_div0: entity work.counter
+	generic map (size => speed)
+	port map (
+		clk => clk,
+		clr => clr,
+		load => '0',
+		en => '1',
+		d => clk_div_d,
+		q => clk_div
+	);
+
+
+	popcount_asm0: entity work.popcount_asm port map (
+		clk => clk_div(speed-1),
+		clr => clr,
+		init => init,
+		a0 => reg_a(0),
+		zero => zero,
+
+		count_ld => count_ld,
+		count_en => count_en,
+		reg_ld => reg_ld,
+		reg_en => reg_en,
+		dec_en => dec_en
+	);
+
+
+	reg0: entity work.shift_register generic map (size => size) port map (
+		clk => clk_div(speed-1),
+		clr => clr,
+		load => reg_ld,
+		en => reg_en,
+		d => d,
+		q => reg_a
+	);
+
+
+	counter0: entity work.counter generic map (4) port map (
+		clk => clk_div(speed-1),
+		clr => clr,
+		load => count_ld,
+		en => count_en,
+		d => "0000",
+		q => count
+	);
+
+
+	disp0: entity work.bcd2display7
+	generic map (common_cathode => common_cathode)
+	port map (
+		bcd => count,
+		display7 => disp_out
+	);
+
+
+end popcount_arch;
+</code></pre>
+	<a href="#nav">back to nav</a>
+</article>
+<article id="popcount-test.vhdl">
+	<h1>Test <em>popcount-test.vhdl</em></h1>
+	<a href="#nav">back to nav</a>
+	<pre><code class="language-vhdl">library std;
+	use std.textio.all;
+library ieee;
+	use ieee.std_logic_1164.all;
+	use ieee.numeric_std.all;
+
+library work;
+	use work.ctype.num_base;
+	use work.conv.str2int;
+	use work.conv.int2str;
+	use work.conv.ustdlv;
+	use work.conv.uint;
+
+
+entity popcount_test is
+	generic (
+		test_in: string := "popcount-test-in.txt";
+		test_out: string := "popcount-test-out.txt"
+	);
+end popcount_test;
+
+
+architecture popcount_test_arch of popcount_test is
+
+	constant clk_period: time := 250 ns;
+	signal clk_en: std_logic := '1';
+	signal clk: std_logic;
+
+	constant speed: positive := 1;
+	signal clr: std_logic;
+	signal init: std_logic;
+	signal d: std_logic_vector(7 downto 0);
+	signal a: std_logic_vector(7 downto 0);
+	signal display7: std_logic_vector(6 downto 0);
+
+begin
+
+	clk0: entity work.clock_pulse
+		generic map (period => clk_period)
+		port map (enable => clk_en, clock => clk);
+
+	popcount0: entity work.popcount
+	generic map (
+		speed => speed,
+		common_cathode => true
+	)
+	port map (
+		clk => clk,
+		clr => clr,
+		init => init,
+		d => d,
+		a => a,
+		display7 => display7
+	);
+
+	process
+		file f0: text open read_mode is test_in;
+		file f1: text open write_mode is test_out;
+		variable l0, l1: line;
+		variable ln: positive := 1;
+		variable i: positive;
+		variable n: integer;
+		variable parsed: boolean;
+	begin
+
+		if endfile(f0) then
+			clk_en <= '0';
+			wait;
+		end if;
+
+		parsed := false;
+		readline(f0, l0);
+		if l0'length /= 0 and l0(l0'low) /= '#' then
+			i := 1;
+
+			-- clr
+			str2int(l0.all(i to l0.all'right), i, n);
+			clr <= ustdlv(n, 1)(0);
+
+			-- init
+			str2int(l0.all(i to l0.all'right), i, n);
+			init <= ustdlv(n, 1)(0);
+
+			-- d
+			str2int(l0.all(i to l0.all'right), i, n);
+			d <= ustdlv(n, d'length);
+
+			parsed := true;
+			wait until rising_edge(clk);
+		else
+			writeline(f1, l0);
+		end if;
+
+		if parsed then
+			write(l1, int2str(     uint(clr), dec), right, 9);
+			write(l1, int2str(    uint(init), dec), right, 6);
+			write(l1, int2str(       uint(d), bin), right, 14);
+			write(l1, int2str(       uint(a), bin), right, 14);
+			write(l1, int2str(uint(display7), bin), right, 14);
+			writeline(f1, l1);
+		end if;
+		ln := ln + 1;
+
+	end process;
+
+end popcount_test_arch;
+</code></pre>
+	<a href="#nav">back to nav</a>
+</article>
+<article id="popcount-test-in.txt">
+	<h1>Test input <em>popcount-test-in.txt</em></h1>
+	<a href="#nav">back to nav</a>
+	<pre><code class="language-bash"># format:
+#     clr  init           d  |          a       display7   clk_out
+#     0/1   0/1  0b00000000  | 0b00000000     0b00000000     0/1
+#
+
+# clear
+        1     0  0b00000000
+
+# wait
+        0     0  0b00000001
+        0     0  0b00000010
+        0     0  0b00000011
+
+# init
+        0     0  0b00110101
+        0     0  0b00110101
+        0     0  0b00110101
+        0     0  0b00110101
+        0     1  0b00110101
+        0     1  0b00110101
+        0     1  0b00110101
+        0     1  0b00110101
+        0     1  0b00110101
+        0     1  0b00110101
+        0     1  0b00110101
+        0     1  0b00110101
+        0     1  0b00110101
+        0     1  0b00110101
+        0     1  0b00110101
+        0     1  0b00110101
+        0     1  0b00110101
+        0     1  0b00110101
+        0     1  0b00110101
+        0     1  0b00110101
+        0     1  0b00110101
+        0     1  0b00110101
+        0     1  0b00110101
+        0     1  0b00110101
+        0     1  0b00110101
+        0     0  0b00000000
+
+# init
+        0     0  0b11101111
+        0     0  0b11101111
+        0     0  0b11101111
+        0     0  0b11101111
+        0     1  0b11101111
+        0     1  0b11101111
+        0     1  0b11101111
+        0     1  0b11101111
+        0     1  0b11101111
+        0     1  0b11101111
+        0     1  0b11101111
+        0     1  0b11101111
+        0     1  0b11101111
+        0     1  0b11101111
+        0     1  0b11101111
+        0     1  0b11101111
+        0     1  0b11101111
+        0     1  0b11101111
+        0     1  0b11101111
+        0     1  0b11101111
+        0     1  0b11101111
+        0     1  0b11101111
+        0     1  0b11101111
+        0     1  0b11101111
+        0     1  0b11101111
+        0     0  0b00000000
+
+# init
+        0     0  0b11111111
+        0     0  0b11111111
+        0     0  0b11111111
+        0     0  0b11111111
+        0     1  0b11111111
+        0     1  0b11111111
+        0     1  0b11111111
+        0     1  0b11111111
+        0     1  0b11111111
+        0     1  0b11111111
+        0     1  0b11111111
+        0     1  0b11111111
+        0     1  0b11111111
+        0     1  0b11111111
+        0     1  0b11111111
+        0     1  0b11111111
+        0     1  0b11111111
+        0     1  0b11111111
+        0     1  0b11111111
+        0     1  0b11111111
+        0     1  0b11111111
+        0     1  0b11111111
+        0     1  0b11111111
+        0     1  0b11111111
+        0     1  0b11111111
+        0     0  0b00000000
+
+# wait for last
+        0     0  0b00000000
+</code></pre>
+	<a href="#nav">back to nav</a>
+</article>
+<article id="popcount-test-out.txt">
+	<h1>Test output <em>popcount-test-out.txt</em></h1>
+	<a href="#nav">back to nav</a>
+	<pre><code class="language-bash"># format:
+#     clr  init           d  |          a       display7   clk_out
+#     0/1   0/1  0b00000000  | 0b00000000     0b00000000     0/1
+#
+
+# clear
+        1     0           0b0           0b0           0b1
+
+# wait
+        0     0           0b1           0b0           0b1
+        0     0          0b10          0b10           0b1
+        0     0          0b11          0b10           0b1
+
+# init
+        0     0      0b110101      0b110101           0b1
+        0     0      0b110101      0b110101           0b1
+        0     0      0b110101      0b110101           0b1
+        0     0      0b110101      0b110101           0b1
+        0     1      0b110101      0b110101           0b1
+        0     1      0b110101      0b110101           0b1
+        0     1      0b110101      0b110101           0b1
+        0     1      0b110101      0b110101           0b1
+        0     1      0b110101       0b11010           0b1
+        0     1      0b110101       0b11010           0b1
+        0     1      0b110101        0b1101           0b1
+        0     1      0b110101        0b1101           0b1
+        0     1      0b110101         0b110           0b1
+        0     1      0b110101         0b110           0b1
+        0     1      0b110101          0b11           0b1
+        0     1      0b110101          0b11           0b1
+        0     1      0b110101           0b1           0b1
+        0     1      0b110101           0b1           0b1
+        0     1      0b110101           0b0           0b1
+        0     1      0b110101           0b0           0b1
+        0     1      0b110101           0b0      0b110011
+        0     1      0b110101           0b0      0b110011
+        0     1      0b110101           0b0      0b110011
+        0     1      0b110101           0b0      0b110011
+        0     1      0b110101           0b0      0b110011
+        0     0           0b0           0b0      0b110011
+
+# init
+        0     0    0b11101111           0b0           0b1
+        0     0    0b11101111           0b0           0b1
+        0     0    0b11101111    0b11101111           0b1
+        0     0    0b11101111    0b11101111           0b1
+        0     1    0b11101111    0b11101111           0b1
+        0     1    0b11101111    0b11101111           0b1
+        0     1    0b11101111    0b11101111           0b1
+        0     1    0b11101111    0b11101111           0b1
+        0     1    0b11101111     0b1110111           0b1
+        0     1    0b11101111     0b1110111           0b1
+        0     1    0b11101111      0b111011           0b1
+        0     1    0b11101111      0b111011           0b1
+        0     1    0b11101111       0b11101           0b1
+        0     1    0b11101111       0b11101           0b1
+        0     1    0b11101111        0b1110           0b1
+        0     1    0b11101111        0b1110           0b1
+        0     1    0b11101111         0b111           0b1
+        0     1    0b11101111         0b111           0b1
+        0     1    0b11101111          0b11           0b1
+        0     1    0b11101111          0b11           0b1
+        0     1    0b11101111           0b1           0b1
+        0     1    0b11101111           0b1           0b1
+        0     1    0b11101111           0b0           0b1
+        0     1    0b11101111           0b0           0b1
+        0     1    0b11101111           0b0     0b1110000
+        0     0           0b0           0b0     0b1110000
+
+# init
+        0     0    0b11111111           0b0           0b1
+        0     0    0b11111111           0b0           0b1
+        0     0    0b11111111    0b11111111           0b1
+        0     0    0b11111111    0b11111111           0b1
+        0     1    0b11111111    0b11111111           0b1
+        0     1    0b11111111    0b11111111           0b1
+        0     1    0b11111111    0b11111111           0b1
+        0     1    0b11111111    0b11111111           0b1
+        0     1    0b11111111     0b1111111           0b1
+        0     1    0b11111111     0b1111111           0b1
+        0     1    0b11111111      0b111111           0b1
+        0     1    0b11111111      0b111111           0b1
+        0     1    0b11111111       0b11111           0b1
+        0     1    0b11111111       0b11111           0b1
+        0     1    0b11111111        0b1111           0b1
+        0     1    0b11111111        0b1111           0b1
+        0     1    0b11111111         0b111           0b1
+        0     1    0b11111111         0b111           0b1
+        0     1    0b11111111          0b11           0b1
+        0     1    0b11111111          0b11           0b1
+        0     1    0b11111111           0b1           0b1
+        0     1    0b11111111           0b1           0b1
+        0     1    0b11111111           0b0           0b1
+        0     1    0b11111111           0b0           0b1
+        0     1    0b11111111           0b0     0b1111111
+        0     0           0b0           0b0     0b1111111
+
+# wait for last
+        0     0           0b0           0b0           0b1
+</code></pre>
+	<a href="#nav">back to nav</a>
+</article>
+<article id="popcount-test.png">
+	<h1>Test waveform <em>popcount-test.png</em></h1>
+	<a href="#nav">back to nav</a>
+	<p><img src="popcount-test.png"
+		alt="waveform of test"
+		style="width: 100%;"></p>
+	<a href="#nav">back to nav</a>
+</article>
+<article id="popcount-nexys3-pinout.png">
+	<h1>Schematic pinout <em>popcount-nexys3-pinout.png</em></h1>
+	<a href="#nav">back to nav</a>
+	<p><img src="popcount-nexys3-pinout.png"
+		alt="pinout of popcount-arch.vhdl"
+		style="width: 100%;"></p>
+	<a href="#nav">back to nav</a>
+</article>
+<article id="popcount-nexys3-schema.png">
+	<h1>Schematic full <em>popcount-nexys3-schema.png</em></h1>
+	<a href="#nav">back to nav</a>
+	<p><img src="popcount-nexys3-schema.png"
+		alt="full schematic of popcount-arch.vhdl"
+		style="width: 100%;"></p>
+	<a href="#nav">back to nav</a>
+</article>
+<article id="popcount-nexys3.ucf">
+	<h1>Pin placement (UCF) <em>popcount-nexys3.ucf</em></h1>
+	<a href="#nav">back to nav</a>
+	<pre><code class="language-clike">net "clr" loc="C4";
+net "clk" loc="V10";
+net "init" loc="C9";
+
+net "d[7]" loc="T5";
+net "d[6]" loc="V8";
+net "d[5]" loc="U8";
+net "d[4]" loc="N8";
+net "d[3]" loc="M8";
+net "d[2]" loc="V9";
+net "d[1]" loc="T9";
+net "d[0]" loc="T10";
+
+net "display7[6]" loc="T17";
+net "display7[5]" loc="T18";
+net "display7[4]" loc="U17";
+net "display7[3]" loc="U18";
+net "display7[2]" loc="M14";
+net "display7[1]" loc="N14";
+net "display7[0]" loc="L14";
+</code></pre>
+	<a href="#nav">back to nav</a>
+</article>
+<article id="util-arch.vhdl">
+	<h1>Source code of <em>util-arch.vhdl</em></h1>
+	<a href="#nav">back to nav</a>
+	<pre><code class="language-vhdl">--------------------------
+-- Clock for testbenchs --
+--------------------------
+
+library ieee;
+	use ieee.std_logic_1164.all;
+
+
+entity clock_pulse is
+	generic (period: time);
+	port (enable: in std_logic; clock: out std_logic);
+end clock_pulse;
+
+
+architecture clock_pulse_arch of clock_pulse is
+	signal clk: std_logic := '0';
+begin
+	clk <=
+		not clk after period/2 when enable = '1' else
+		'0' when enable = '0';
+	clock <= clk;
+end clock_pulse_arch;
+
+
+--------------------------
+-- A 2to1 mux ------------
+--------------------------
+
+library ieee;
+	use ieee.std_logic_1164.all;
+
+
+entity mux2to1 is
+	generic (size: positive);
+	port (
+		a: in std_logic_vector(size-1 downto 0);
+		b: in std_logic_vector(size-1 downto 0);
+		s: in std_logic;
+		z: out std_logic_vector(size-1 downto 0)
+	);
+end mux2to1;
+
+
+architecture mux2to1_arch of mux2to1 is
+begin
+	process (s, a, b)
+	begin
+		case s is
+		when '0'    => z <= a;
+		when others => z <= b;
+		end case;
+	end process;
+end mux2to1_arch;
+
+
+--------------------------
+-- A clock divisor -------
+--------------------------
+
+
+library ieee;
+	use ieee.std_logic_1164.all;
+	use ieee.numeric_std.all;
+
+library work;
+
+
+entity clock_divisor is
+	generic(size: natural);
+	port(
+		clk: in std_logic;
+		q: out std_logic_vector(size-1 downto 0)
+	);
+end clock_divisor;
+
+
+architecture clock_divisor_arch of clock_divisor is
+begin
+	process(clk)
+		variable t: std_logic_vector(size-1 downto 0);
+	begin
+		if (rising_edge(clk)) then
+			t := std_logic_vector(
+				unsigned(t) + to_unsigned(1, t'length)
+			);
+			q <= t;
+		end if;
+	end process;
+end clock_divisor_arch;
+
+
+---------------------
+-- Types ------------
+---------------------
+
+library ieee;
+	use ieee.std_logic_1164.all;
+
+package types is
+
+	type slv25_arr_t is
+		array (natural range<>) of std_logic_vector(24 downto 0);
+
+end;
+
+
+---------------------
+-- Math functions ---
+---------------------
+
+package math is
+
+	function log(x: positive; base: positive) return natural;
+
+end;
+
+
+package body math is
+
+
+	function log(x: positive; base: positive) return natural is
+	begin
+		if (base = 1) then
+			report "log base 1 is not appropriate" severity error;
+		elsif (x = 0) then
+			report "log arg 0 is not appropriate" severity error;
+		end if;
+		if x < base then
+			return 0;
+		else
+			return 1 + log(x/base, base);
+		end if;
+	end log;
+
+
+end package body;
+
+
+---------------------
+-- Character types --
+---------------------
+
+package ctype is
+
+	type num_base is (bin, oct, dec, hex);
+	function max(f: num_base) return natural;
+
+	function isspace(x: character)                     return boolean;
+	function  isstdl(x: character)                     return boolean;
+	function isdigit(x: character; f: num_base := dec) return boolean;
+
+end;
+
+
+package body ctype is
+
+
+	function max(f: num_base) return natural is
+	begin
+		case f is
+		when bin => return  2;
+		when oct => return  8;
+		when dec => return 10;
+		when hex => return 16;
+		end case;
+	end max;
+
+
+	function isspace(x: character) return boolean is
+	begin
+		case x is
+		when ' '|HT|LF|VT|FF|CR => return true;
+		when others => return false;
+		end case;
+	end isspace;
+
+
+	function isstdl(x: character) return boolean is
+	begin
+		case x is
+		when '0'|'1' => return true;
+		when 'l'|'h'|'u'|'z'|'w'|'x'|'-' => return true;
+		when 'L'|'H'|'U'|'Z'|'W'|'X'|'-' => return true;
+		when others => return false;
+		end case;
+	end isstdl;
+
+
+	function isdigit(x: character; f: num_base := dec) return boolean is
+	begin
+		case f is
+		when bin =>
+			case x is
+			when '0'|'1' => return true;
+			when others => return false;
+			end case;
+		when oct =>
+			case x is
+			when '0'|'1'|'2'|'3'|'4'|'5'|'6'|'7' => return true;
+			when others => return false;
+			end case;
+		when dec =>
+			case x is
+			when '0'|'1'|'2'|'3'|'4'|'5'|'6'|'7' => return true;
+			when '8'|'9' => return true;
+			when others => return false;
+			end case;
+		when hex =>
+			case x is
+			when '0'|'1'|'2'|'3'|'4'|'5'|'6'|'7' => return true;
+			when '8'|'9' => return true;
+			when 'a'|'b'|'c'|'d'|'e'|'f' => return true;
+			when 'A'|'B'|'C'|'D'|'E'|'F' => return true;
+			when others => return false;
+			end case;
+		end case;
+	end isdigit;
+
+
+end package body;
+
+
+--
+-- Conversion library
+--
+
+library ieee;
+	use ieee.std_logic_1164.all;
+	use ieee.numeric_std.all;
+
+use work.ctype.all;
+
+
+package conv is
+
+	function    int(x: std_logic_vector)     return integer;
+	function    int(x: std_logic)            return integer;
+	function   uint(x: std_logic_vector)     return natural;
+	function   uint(x: std_logic)            return natural;
+	function  stdlv(x: integer; l: positive) return std_logic_vector;
+	function ustdlv(x: natural; l: positive) return std_logic_vector;
+
+	function chr2num(x: character; f: num_base := dec; xmap: bit := '0')
+		return integer;
+	function num2chr(x: integer; f: num_base := dec)
+		return character;
+
+	function   int2str(x: integer; f: num_base := dec) return string;
+	function  stdl2chr(x: std_logic)                   return character;
+	function stdlv2str(x: std_logic_vector)            return string;
+
+	procedure str2int(             -- number can be bin, oct, dec or hex
+		nstr: in string;       -- string to be converted
+		endstr: out positive;  -- store index of first non-valid char
+		num: out integer;      -- store converted number
+		xmap: in bit := '0'    -- what to do with U, X, Z, etc
+	);
+
+end;
+
+
+package body conv is
+
+
+	function int(x: std_logic_vector) return integer is
+	begin
+		return to_integer(signed(x));
+	end int;
+
+
+	function int(x: std_logic) return integer is
+	begin
+		return uint("0" & x); -- a bit is unsigned anyway
+	end int;
+
+
+	function uint(x: std_logic_vector) return natural is
+	begin
+		return to_integer(unsigned(x));
+	end uint;
+
+
+	function uint(x: std_logic) return natural is
+	begin
+		return uint("0" & x); -- a bit is unsigned anyway
+	end uint;
+
+
+	function stdlv(x: integer; l: positive) return std_logic_vector is
+	begin
+		return std_logic_vector(to_signed(x, l));
+	end stdlv;
+
+
+	function ustdlv(x: natural; l: positive) return std_logic_vector is
+	begin
+		return std_logic_vector(to_unsigned(x, l));
+	end ustdlv;
+
+
+	function chr2num(x: character; f: num_base := dec; xmap: bit := '0')
+			return integer is
+	begin
+		if isdigit(x, f) then
+			case x is
+			when '0' => return 0;
+			when '1' => return 1;
+			when '2' => return 2;
+			when '3' => return 3;
+			when '4' => return 4;
+			when '5' => return 5;
+			when '6' => return 6;
+			when '7' => return 7;
+			when '8' => return 8;
+			when '9' => return 9;
+			when 'a'|'A' => return 10;
+			when 'b'|'B' => return 11;
+			when 'c'|'C' => return 12;
+			when 'd'|'D' => return 13;
+			when 'e'|'E' => return 14;
+			when 'f'|'F' => return 15;
+			end case;
+		elsif f /= dec then -- L, H, W, etc don't make sense in decimal
+			case x is
+			when 'l'|'L' => return 0;
+			when 'h'|'H' => return max(f) - 1;
+			when
+				'u'|'z'|'w'|'x'|'-'|
+				'U'|'Z'|'W'|'X'|'-' =>
+				case xmap is
+				when '0' => return 0;
+				when '1' => return max(f) - 1;
+				end case;
+			when others => return -1;
+			end case;
+		end if;
+		return -1;
+	end chr2num;
+
+
+	function num2chr(x: integer; f: num_base := dec) return character is
+		variable c: character;
+	begin
+		case x is
+		when 0 => c := '0';
+		when 1 => c := '1';
+		when 2 =>
+			if f = bin then c := '?';
+			else c := '2'; end if;
+		when 3 =>
+			if f = bin then c := '?';
+			else c := '3'; end if;
+		when 4 =>
+			if f = bin then c := '?';
+			else c := '4'; end if;
+		when 5 =>
+			if f = bin then c := '?';
+			else c := '5'; end if;
+		when 6 =>
+			if f = bin then c := '?';
+			else c := '6'; end if;
+		when 7 =>
+			if f = bin then c := '?';
+			else c := '7'; end if;
+		when 8 =>
+			if f = bin or f = oct then c := '?';
+			else c := '8'; end if;
+		when 9 =>
+			if f = bin or f = oct then c := '?';
+			else c := '9'; end if;
+		when 10 =>
+			if f = bin or f = oct or f = dec then c := '?';
+			else c := 'a'; end if;
+		when 11 =>
+			if f = bin or f = oct or f = dec then c := '?';
+			else c := 'b'; end if;
+		when 12 =>
+			if f = bin or f = oct or f = dec then c := '?';
+			else c := 'c'; end if;
+		when 13 =>
+			if f = bin or f = oct or f = dec then c := '?';
+			else c := 'd'; end if;
+		when 14 =>
+			if f = bin or f = oct or f = dec then c := '?';
+			else c := 'e'; end if;
+		when 15 =>
+			if f = bin or f = oct or f = dec then c := '?';
+			else c := 'f'; end if;
+		when others =>
+			c := '?';
+		end case;
+		return c;
+	end num2chr;
+
+
+	function int2str(x: integer; f: num_base := dec) return string is
+		-- recursion to the rescue!!!
+		function c(x: integer) return string is
+		begin
+			if x < max(f) then
+				return "" & num2chr(x);
+			else
+				return c(x/max(f)) & num2chr(x mod max(f), f);
+			end if;
+		end c;
+		variable a: integer;
+	begin
+		if x < 0 then
+			a := -x;
+			case f is
+			when bin => return "-0b" & c(a);
+			when oct => return "-0" & c(a);
+			when dec => return "-" & c(a);
+			when hex => return "-0x" & c(a);
+			end case;
+		else
+			a := x;
+			case f is
+			when bin => return "0b" & c(a);
+			when oct => return "0" & c(a);
+			when dec => return "" & c(a);
+			when hex => return "0x" & c(a);
+			end case;
+		end if;
+	end int2str;
+
+
+	function stdl2chr(x: std_logic) return character is
+		variable c: character;
+	begin
+		case x is
+		when '0' => c := '0';
+		when '1' => c := '1';
+		when 'L' => c := 'L';
+		when 'H' => c := 'H';
+		when 'U' => c := 'U';
+		when 'Z' => c := 'Z';
+		when 'W' => c := 'W';
+		when 'X' => c := 'X';
+		when '-' => c := '-';
+		end case;
+		return c;
+	end stdl2chr;
+
+
+	function stdlv2str(x: std_logic_vector) return string is
+		variable s: string(1 to x'length);
+	begin
+		for i in x'left downto x'right loop
+			s(x'left - i + 1) := stdl2chr(x(i));
+		end loop;
+		return s;
+	end stdlv2str;
+
+
+	procedure str2int(
+			nstr: in string;
+			endstr: out positive;
+			num: out integer;
+			xmap: in bit := '0') is
+		variable i: positive := nstr'left;
+		variable v: integer := 0;
+		variable t: num_base;
+		variable b: positive;
+		variable s: boolean := false;
+	begin
+		endstr := i;
+		num := 0;
+		while i <= nstr'right and isspace(nstr(i)) loop
+			i := i + 1;
+		end loop;
+		if nstr'right < i then
+			report "str2int: empty" severity warning;
+			return;
+		end if;
+		-- number must start here
+		if nstr(i) = '-' then
+			i := i + 1;
+			if nstr'right < i then
+				report "str2int: empty after '-'"
+					severity warning;
+				return;
+			end if;
+			s := true;
+		end if;
+		if nstr(i) = '0' then
+			i := i + 1;
+			if nstr'right < i then
+				endstr := i;
+				num := 0;
+				return;
+			end if;
+			case nstr(i) is
+			when 'x'|'X' => t := hex; b := 16;
+			when 'b'|'B' => t := bin; b := 2;
+			when others => -- oct has only the '0' prefix
+				if chr2num(nstr(i), oct, xmap) = -1 then
+					endstr := i;
+					num := 0;
+					return;
+				end if;
+				i := i - 1;
+				t := oct; b := 8;
+			end case;
+			i := i + 1;
+		elsif chr2num(nstr(i), dec, xmap) = -1 then
+			report "str2int invalid dec char " &
+				"'" & nstr(i) & "'" severity warning;
+			return;
+		else
+			t := dec; b := 10;
+		end if;
+		if nstr'right < i then
+			report "str2int empty after prefix" severity warning;
+			return;
+		end if;
+		-- start conversion
+		while
+			i <= nstr'right and
+			chr2num(nstr(i), t, xmap) /= -1 loop
+			v := b*v + chr2num(nstr(i), t, xmap);
+			i := i + 1;
+		end loop;
+		endstr := i;
+		if s then num := -v; else num := v; end if;
+	end procedure str2int;
+
+end package body;
+</code></pre>
+	<a href="#nav">back to nav</a>
+</article>
+<article id="bcd2display7-arch.vhdl">
+	<h1>Source code of <em>bcd2display7-arch.vhdl</em></h1>
+	<a href="#nav">back to nav</a>
+	<pre><code class="language-vhdl">library ieee;
+	use ieee.std_logic_1164.all;
+	use ieee.std_logic_arith.all;
+	use ieee.std_logic_unsigned.all;
+
+
+entity bcd2display7 is
+	generic (common_cathode: boolean := true);
+	port (
+		bcd: in std_logic_vector(3 downto 0);
+		display7: out std_logic_vector(6 downto 0)
+	);
+end bcd2display7;
+
+
+architecture bcd2display7_arch of bcd2display7 is
+begin
+	process (bcd)
+	begin
+		if common_cathode then
+			case  bcd is
+			when "0000" => display7 <= "1111110"; -- 0
+			when "0001" => display7 <= "0110000"; -- 1
+			when "0010" => display7 <= "1101101"; -- 2
+			when "0011" => display7 <= "1111001"; -- 3
+			when "0100" => display7 <= "0110011"; -- 4
+			when "0101" => display7 <= "1011011"; -- 5
+			when "0110" => display7 <= "1011111"; -- 6
+			when "0111" => display7 <= "1110000"; -- 7
+			when "1000" => display7 <= "1111111"; -- 8
+			when "1001" => display7 <= "1110011"; -- 9
+			when others => display7 <= "0000001"; -- -
+			end case;
+		else
+			case  bcd is
+			when "0000" => display7 <= not "1111110"; -- 0
+			when "0001" => display7 <= not "0110000"; -- 1
+			when "0010" => display7 <= not "1101101"; -- 2
+			when "0011" => display7 <= not "1111001"; -- 3
+			when "0100" => display7 <= not "0110011"; -- 4
+			when "0101" => display7 <= not "1011011"; -- 5
+			when "0110" => display7 <= not "1011111"; -- 6
+			when "0111" => display7 <= not "1110000"; -- 7
+			when "1000" => display7 <= not "1111111"; -- 8
+			when "1001" => display7 <= not "1110011"; -- 9
+			when others => display7 <= not "0000001"; -- -
+			end case;
+		end if;
+	end process;
+end bcd2display7_arch;
+</code></pre>
+	<a href="#nav">back to nav</a>
+</article>
+<article id="counter-arch.vhdl">
+	<h1>Source code of <em>counter-arch.vhdl</em></h1>
+	<a href="#nav">back to nav</a>
+	<pre><code class="language-vhdl">library ieee;
+	use ieee.std_logic_1164.all;
+	use ieee.numeric_std.all;
+
+library work;
+	use work.conv.uint;
+	use work.conv.ustdlv;
+
+
+entity counter is
+	generic(size: natural := 4);
+	port(
+		clk: in std_logic;
+		clr: in std_logic;
+		load: in std_logic;
+		en: in std_logic;
+		d: in std_logic_vector(size-1 downto 0);
+		q: out std_logic_vector(size-1 downto 0)
+	);
+end counter;
+
+
+architecture counter_arch of counter is
+begin
+
+	process(clk, clr)
+		variable t: std_logic_vector(size-1 downto 0);
+	begin
+		if (clr = '1') then
+			t := (others => '0');
+		elsif (rising_edge(clk)) then
+			   if (load = '0' and en = '0') then
+				t := t;
+			elsif (load = '0' and en = '1') then
+				t := std_logic_vector(
+					unsigned(t) + to_unsigned(1, t'length)
+				);
+			elsif (load = '1' and en = '0') then
+				t := d;
+			end if;
+		end if;
+		q <= t;
+	end process;
+
+end counter_arch;
+</code></pre>
+	<a href="#nav">back to nav</a>
+</article>
+<article id="popcount-asm-arch.vhdl">
+	<h1>Source code of <em>popcount-asm-arch.vhdl</em></h1>
+	<a href="#nav">back to nav</a>
+	<pre><code class="language-vhdl">library ieee;
+	use ieee.std_logic_1164.all;
+
+
+entity popcount_asm is
+	port (
+		clk: in std_logic;
+		clr: in std_logic;
+		init: in std_logic;
+		a0: in std_logic;
+		zero: in std_logic;
+
+		count_ld: out std_logic;
+		count_en: out std_logic;
+		reg_ld: out std_logic;
+		reg_en: out std_logic;
+		dec_en: out std_logic
+	);
+end popcount_asm;
+
+
+architecture popcount_asm_arch of popcount_asm is
+	type state is (
+		wait_init,
+		process_input,
+		show_count
+	);
+	signal this_s, next_s: state;
+	signal count: std_logic_vector(1 downto 0);
+	signal reg: std_logic_vector(1 downto 0);
+	signal dec: std_logic;
+begin
+
+	count_ld <= count(1);
+	count_en <= count(0);
+	reg_ld <= reg(1);
+	reg_en <= reg(0);
+	dec_en <= dec;
+
+	process (clk, clr)
+	begin
+		if (clr = '1') then
+			this_s <= wait_init;
+		elsif (rising_edge(clk)) then
+			this_s <= next_s;
+		end if;
+	end process;
+
+
+	process (init, a0, zero, this_s)
+	begin
+		case this_s is
+
+		when wait_init =>
+			dec <= '0';
+			count <= "10";
+			if (init = '1') then
+				next_s <= process_input;
+			else
+				next_s <= wait_init;
+				reg <= "10";
+			end if;
+
+		when process_input =>
+			dec <= '0';
+			reg <= "01";
+			if (zero = '1') then
+				next_s <= show_count;
+				count <= "00";
+			else
+				next_s <= process_input;
+				if (a0 = '1') then
+					count <= "01";
+				else
+					count <= "00";
+				end if;
+			end if;
+
+		when show_count =>
+			dec <= '1';
+			if (init = '0') then
+				next_s <= wait_init;
+			else
+				next_s <= show_count;
+			end if;
+		end case;
+
+	end process;
+
+end popcount_asm_arch;
+</code></pre>
+	<a href="#nav">back to nav</a>
+</article>
+<article id="shift-register-arch.vhdl">
+	<h1>Source code of <em>shift-register-arch.vhdl</em></h1>
+	<a href="#nav">back to nav</a>
+	<pre><code class="language-vhdl">library ieee;
+	use ieee.std_logic_1164.all;
+
+library work;
+	use work.conv.uint;
+
+
+entity shift_register is
+	generic(size: natural := 4);
+	port(
+		clk: in std_logic;
+		clr: in std_logic;
+		load: in std_logic;
+		en: in std_logic;
+		d: in std_logic_vector(size-1 downto 0);
+		q: out std_logic_vector(size-1 downto 0)
+	);
+end shift_register;
+
+
+architecture shift_register_arch of shift_register is
+	alias slv is to_stdlogicvector [bit_vector return std_logic_vector];
+	alias bv is to_bitvector [std_logic_vector, bit return bit_vector];
+begin
+
+	process(clk, clr)
+		variable t: std_logic_vector(size-1 downto 0);
+	begin
+		if (clr = '1') then
+			t := (others => '0');
+		elsif (rising_edge(clk)) then
+			   if (load = '0' and en = '0') then
+				t := t;
+			elsif (load = '0' and en = '1') then
+				t := slv(bv(t) srl 1);
+			elsif (load = '1' and en = '0') then
+				t := d;
+			end if;
+		end if;
+		q <= t;
+	end process;
+
+end shift_register_arch;
+</code></pre>
+	<a href="#nav">back to nav</a>
+</article>
+<article id="sim">
+
+	<h1 id="sim-fuse">Compilation <em>fuse.log</em></h1>
+	<a href="#nav">back to nav</a>
+	<pre><code class="language-markdown">Running: /opt/Xilinx/14.7/ISE_DS/ISE/bin/lin64/unwrapped/fuse -incremental -timeprecision_vhdl 1ns -generic_top test_in=../../../src/08_popcount/popcount-test-in.txt -generic_top test_out=../../../src/08_popcount/popcount-test-out.txt -prj sim.prj work.popcount_test -o sim.exe 
+ISim P.20131013 (signature 0xfbc00daa)
+Number of CPUs detected in this system: 2
+Turning on mult-threading, number of parallel sub-compilation jobs: 4 
+Determining compilation order of HDL files
+Parsing VHDL file "../../../src/00_util/util-arch.vhdl" into library work
+Parsing VHDL file "../../../src/08_popcount/counter-arch.vhdl" into library work
+Parsing VHDL file "../../../src/08_popcount/popcount-asm-arch.vhdl" into library work
+Parsing VHDL file "../../../src/08_popcount/shift-register-arch.vhdl" into library work
+Parsing VHDL file "../../../src/08_popcount/bcd2display7-arch.vhdl" into library work
+Parsing VHDL file "../../../src/08_popcount/popcount-arch.vhdl" into library work
+Parsing VHDL file "../../../src/08_popcount/popcount-test.vhdl" into library work
+Starting static elaboration
+Completed static elaboration
+Fuse Memory Usage: 98264 KB
+Fuse CPU Usage: 3910 ms
+Compiling package standard
+Compiling package textio
+Compiling package std_logic_1164
+Compiling package numeric_std
+Compiling package ctype
+Compiling package conv
+Compiling architecture clock_pulse_arch of entity clock_pulse [\clock_pulse(250)\]
+Compiling package std_logic_arith
+Compiling package std_logic_unsigned
+Compiling architecture mux2to1_arch of entity mux2to1 [\mux2to1(7)\]
+Compiling architecture counter_arch of entity counter [\counter(1)\]
+Compiling architecture popcount_asm_arch of entity popcount_asm [popcount_asm_default]
+Compiling architecture shift_register_arch of entity shift_register [\shift_register(8)\]
+Compiling architecture counter_arch of entity counter [\counter(4)\]
+Compiling architecture bcd2display7_arch of entity bcd2display7 [\bcd2display7(true)\]
+Compiling architecture popcount_arch of entity popcount [\popcount(1,true)\]
+Compiling architecture popcount_test_arch of entity popcount_test
+Time Resolution for simulation is 1ns.
+Waiting for 11 sub-compilation(s) to finish...
+Compiled 25 VHDL Units
+Built simulation executable sim.exe
+Fuse Memory Usage: 418468 KB
+Fuse CPU Usage: 5320 ms
+GCC CPU Usage: 27620 ms
+</code></pre>
+	<a href="#nav">back to nav</a>
+
+	<h1 id="sim-isim">Running     <em>isim.log</em></h1>
+	<a href="#nav">back to nav</a>
+	<pre><code class="language-markdown">ISim log file
+Running: ./sim.exe -tclbatch sim.tcl -wdb sim.wdb 
+ISim P.20131013 (signature 0xfbc00daa)
+This is a Full version of ISim.
+Time resolution is 1 ns
+# onerror resume
+# wave add -radix hex /
+# wave add -radix dec /
+# run all
+Simulator is doing circuit initialization process.
+Finished circuit initialization process.
+# quit
+</code></pre>
+	<a href="#nav">back to nav</a>
+
+</article>
+<article id="syn">
+
+	<h1 id="syn-xst">XST <em>syn.srp</em></h1>
+	<a href="#nav">back to nav</a>
+	<pre><code class="language-markdown">Release 14.7 - xst P.20131013 (lin64)
+Copyright (c) 1995-2013 Xilinx, Inc.  All rights reserved.
+--> 
+--> 
+
+TABLE OF CONTENTS
+  1) Synthesis Options Summary
+  2) HDL Parsing
+  3) HDL Elaboration
+  4) HDL Synthesis
+       4.1) HDL Synthesis Report
+  5) Advanced HDL Synthesis
+       5.1) Advanced HDL Synthesis Report
+  6) Low Level Synthesis
+  7) Partition Report
+  8) Design Summary
+       8.1) Primitive and Black Box Usage
+       8.2) Device utilization summary
+       8.3) Partition Resource Summary
+       8.4) Timing Report
+            8.4.1) Clock Information
+            8.4.2) Asynchronous Control Signals Information
+            8.4.3) Timing Summary
+            8.4.4) Timing Details
+            8.4.5) Cross Clock Domains Report
+
+
+=========================================================================
+*                      Synthesis Options Summary                        *
+=========================================================================
+---- Source Parameters
+Input File Name                    : "syn.prj"
+Input Format                       : mixed
+
+---- Target Parameters
+Output File Name                   : "syn.ngc"
+Output Format                      : ngc
+Target Device                      : xc6slx16-3-csg324
+
+---- Source Options
+Top Module Name                    : popcount
+FSM Style                          : LUT
+
+---- General Options
+RTL Output                         : Yes
+Optimization Goal                  : Speed
+Optimization Effort                : 1
+Bus Delimiter                      : []
+
+=========================================================================
+
+
+=========================================================================
+*                          HDL Parsing                                  *
+=========================================================================
+Parsing src/00_util/util-arch.vhdl,src/08_popcount/bcd2display7-arch.vhdl,src/08_popcount/counter-arch.vhdl,src/08_popcount/popcount-asm-arch.vhdl,src/08_popcount/shift-register-arch.vhdl file "/home/urbo/code/examples/vhdl/escomips/src/00_util/util-arch.vhdl" into library work
+Parsing entity clock_pulse.
+Parsing architecture clock_pulse_arch of entity clock_pulse.
+Parsing entity mux2to1.
+Parsing architecture mux2to1_arch of entity mux2to1.
+Parsing entity clock_divisor.
+Parsing architecture clock_divisor_arch of entity clock_divisor.
+Parsing package types.
+Parsing package math.
+Parsing package body math.
+Parsing package ctype.
+Parsing package body ctype.
+Parsing package conv.
+Parsing package body conv.
+Parsing src/00_util/util-arch.vhdl,src/08_popcount/bcd2display7-arch.vhdl,src/08_popcount/counter-arch.vhdl,src/08_popcount/popcount-asm-arch.vhdl,src/08_popcount/shift-register-arch.vhdl file "/home/urbo/code/examples/vhdl/escomips/src/08_popcount/counter-arch.vhdl" into library work
+Parsing entity counter.
+Parsing architecture counter_arch of entity counter.
+Parsing src/00_util/util-arch.vhdl,src/08_popcount/bcd2display7-arch.vhdl,src/08_popcount/counter-arch.vhdl,src/08_popcount/popcount-asm-arch.vhdl,src/08_popcount/shift-register-arch.vhdl file "/home/urbo/code/examples/vhdl/escomips/src/08_popcount/popcount-asm-arch.vhdl" into library work
+Parsing entity popcount_asm.
+Parsing architecture popcount_asm_arch of entity popcount_asm.
+Parsing src/00_util/util-arch.vhdl,src/08_popcount/bcd2display7-arch.vhdl,src/08_popcount/counter-arch.vhdl,src/08_popcount/popcount-asm-arch.vhdl,src/08_popcount/shift-register-arch.vhdl file "/home/urbo/code/examples/vhdl/escomips/src/08_popcount/shift-register-arch.vhdl" into library work
+Parsing entity shift_register.
+Parsing architecture shift_register_arch of entity shift_register.
+Parsing src/00_util/util-arch.vhdl,src/08_popcount/bcd2display7-arch.vhdl,src/08_popcount/counter-arch.vhdl,src/08_popcount/popcount-asm-arch.vhdl,src/08_popcount/shift-register-arch.vhdl file "/home/urbo/code/examples/vhdl/escomips/src/08_popcount/bcd2display7-arch.vhdl" into library work
+Parsing entity bcd2display7.
+Parsing architecture bcd2display7_arch of entity bcd2display7.
+Parsing src/00_util/util-arch.vhdl,src/08_popcount/bcd2display7-arch.vhdl,src/08_popcount/counter-arch.vhdl,src/08_popcount/popcount-asm-arch.vhdl,src/08_popcount/shift-register-arch.vhdl file "/home/urbo/code/examples/vhdl/escomips/src/08_popcount/popcount-arch.vhdl" into library work
+Parsing entity popcount.
+Parsing architecture popcount_arch of entity popcount.
+
+=========================================================================
+*                            HDL Elaboration                            *
+=========================================================================
+
+Elaborating entity popcount (architecture popcount_arch) with generics from library work.
+
+Elaborating entity mux2to1 (architecture mux2to1_arch) with generics from library work.
+
+Elaborating entity counter (architecture counter_arch) with generics from library work.
+
+Elaborating entity popcount_asm (architecture popcount_asm_arch) from library work.
+
+Elaborating entity shift_register (architecture shift_register_arch) with generics from library work.
+
+Elaborating entity counter (architecture counter_arch) with generics from library work.
+
+Elaborating entity bcd2display7 (architecture bcd2display7_arch) with generics from library work.
+WARNING:HDLCompiler:634 - "/home/urbo/code/examples/vhdl/escomips/src/08_popcount/popcount-arch.vhdl" Line 34: Net clk_div_d[24] does not have a driver.
+
+=========================================================================
+*                           HDL Synthesis                               *
+=========================================================================
+
+Synthesizing Unit popcount.
+    Related source file is "/home/urbo/code/examples/vhdl/escomips/src/08_popcount/popcount-arch.vhdl".
+        speed = 25
+        common_cathode = false
+WARNING:Xst:653 - Signal clk_div_d is used but never assigned. This sourceless signal will be automatically connected to value GND.
+    Summary:
+	no macro.
+Unit popcount synthesized.
+
+Synthesizing Unit mux2to1.
+    Related source file is "/home/urbo/code/examples/vhdl/escomips/src/00_util/util-arch.vhdl".
+        size = 7
+    Summary:
+	inferred   1 Multiplexer(s).
+Unit mux2to1 synthesized.
+
+Synthesizing Unit counter_1.
+    Related source file is "/home/urbo/code/examples/vhdl/escomips/src/08_popcount/counter-arch.vhdl".
+        size = 25
+    Found 25-bit register for signal t.
+    Found 25-bit adder for signal t[24]_t[24]_mux_3_OUT created at line 36.
+    Summary:
+	inferred   1 Adder/Subtractor(s).
+	inferred  25 D-type flip-flop(s).
+Unit counter_1 synthesized.
+
+Synthesizing Unit popcount_asm.
+    Related source file is "/home/urbo/code/examples/vhdl/escomips/src/08_popcount/popcount-asm-arch.vhdl".
+    Found 2-bit register for signal this_s.
+    Found finite state machine FSM_0 for signal this_s.
+    -----------------------------------------------------------------------
+    | States             | 3                                              |
+    | Transitions        | 6                                              |
+    | Inputs             | 2                                              |
+    | Outputs            | 5                                              |
+    | Clock              | clk (rising_edge)                              |
+    | Reset              | clr (positive)                                 |
+    | Reset type         | asynchronous                                   |
+    | Reset State        | wait_init                                      |
+    | Power Up State     | wait_init                                      |
+    | Encoding           | auto                                           |
+    | Implementation     | LUT                                            |
+    -----------------------------------------------------------------------
+WARNING:Xst:737 - Found 1-bit latch for signal count[1]. Latches may be generated from incomplete case or if statements. We do not recommend the use of latches in FPGA/CPLD designs, as they may lead to timing problems.
+WARNING:Xst:737 - Found 1-bit latch for signal count[0]. Latches may be generated from incomplete case or if statements. We do not recommend the use of latches in FPGA/CPLD designs, as they may lead to timing problems.
+WARNING:Xst:737 - Found 1-bit latch for signal reg[1]. Latches may be generated from incomplete case or if statements. We do not recommend the use of latches in FPGA/CPLD designs, as they may lead to timing problems.
+WARNING:Xst:737 - Found 1-bit latch for signal reg[0]. Latches may be generated from incomplete case or if statements. We do not recommend the use of latches in FPGA/CPLD designs, as they may lead to timing problems.
+    Summary:
+	inferred   4 Latch(s).
+	inferred   2 Multiplexer(s).
+	inferred   1 Finite State Machine(s).
+Unit popcount_asm synthesized.
+
+Synthesizing Unit shift_register.
+    Related source file is "/home/urbo/code/examples/vhdl/escomips/src/08_popcount/shift-register-arch.vhdl".
+        size = 8
+    Found 8-bit register for signal t.
+    Summary:
+	inferred   8 D-type flip-flop(s).
+	inferred   1 Multiplexer(s).
+Unit shift_register synthesized.
+
+Synthesizing Unit counter_2.
+    Related source file is "/home/urbo/code/examples/vhdl/escomips/src/08_popcount/counter-arch.vhdl".
+        size = 4
+    Found 4-bit register for signal t.
+    Found 4-bit adder for signal t[3]_GND_18_o_add_0_OUT created at line 36.
+    Summary:
+	inferred   1 Adder/Subtractor(s).
+	inferred   4 D-type flip-flop(s).
+	inferred   1 Multiplexer(s).
+Unit counter_2 synthesized.
+
+Synthesizing Unit bcd2display7.
+    Related source file is "/home/urbo/code/examples/vhdl/escomips/src/08_popcount/bcd2display7-arch.vhdl".
+        common_cathode = false
+    Found 16x7-bit Read Only RAM for signal display7
+    Summary:
+	inferred   1 RAM(s).
+Unit bcd2display7 synthesized.
+
+=========================================================================
+HDL Synthesis Report
+
+Macro Statistics
+# RAMs                                                 : 1
+ 16x7-bit single-port Read Only RAM                    : 1
+# Adders/Subtractors                                   : 2
+ 25-bit adder                                          : 1
+ 4-bit adder                                           : 1
+# Registers                                            : 3
+ 25-bit register                                       : 1
+ 4-bit register                                        : 1
+ 8-bit register                                        : 1
+# Latches                                              : 4
+ 1-bit latch                                           : 4
+# Multiplexers                                         : 5
+ 1-bit 2-to-1 multiplexer                              : 2
+ 4-bit 2-to-1 multiplexer                              : 1
+ 7-bit 2-to-1 multiplexer                              : 1
+ 8-bit 2-to-1 multiplexer                              : 1
+# FSMs                                                 : 1
+
+=========================================================================
+
+=========================================================================
+*                       Advanced HDL Synthesis                          *
+=========================================================================
+
+
+Synthesizing (advanced) Unit bcd2display7.
+INFO:Xst:3218 - HDL ADVISOR - The RAM Mram_display7 will be implemented on LUTs either because you have described an asynchronous read or because of currently unsupported block RAM features. If you have described an asynchronous read, making it synchronous would allow you to take advantage of available block RAM resources, for optimized device usage and improved timings. Please refer to your documentation for coding guidelines.
+    -----------------------------------------------------------------------
+    | ram_type           | Distributed                         |          |
+    -----------------------------------------------------------------------
+    | Port A                                                              |
+    |     aspect ratio   | 16-word x 7-bit                     |          |
+    |     weA            | connected to signal GND           | high     |
+    |     addrA          | connected to signal (bcd[3],bcd[2],bcd[1],bcd[0]) |          |
+    |     diA            | connected to signal GND           |          |
+    |     doA            | connected to signal display7      |          |
+    -----------------------------------------------------------------------
+Unit bcd2display7 synthesized (advanced).
+
+Synthesizing (advanced) Unit counter_1.
+The following registers are absorbed into counter t: 1 register on signal t.
+Unit counter_1 synthesized (advanced).
+
+Synthesizing (advanced) Unit counter_2.
+The following registers are absorbed into counter t: 1 register on signal t.
+Unit counter_2 synthesized (advanced).
+
+=========================================================================
+Advanced HDL Synthesis Report
+
+Macro Statistics
+# RAMs                                                 : 1
+ 16x7-bit single-port distributed Read Only RAM        : 1
+# Counters                                             : 2
+ 25-bit up counter                                     : 1
+ 4-bit up counter                                      : 1
+# Registers                                            : 8
+ Flip-Flops                                            : 8
+# Multiplexers                                         : 11
+ 1-bit 2-to-1 multiplexer                              : 10
+ 7-bit 2-to-1 multiplexer                              : 1
+# FSMs                                                 : 1
+
+=========================================================================
+
+=========================================================================
+*                         Low Level Synthesis                           *
+=========================================================================
+Analyzing FSM MFsm for best encoding.
+Optimizing FSM popcount_asm0/FSM_0 on signal this_s[1:2] with user encoding.
+---------------------------
+ State         | Encoding
+---------------------------
+ wait_init     | 00
+ process_input | 01
+ show_count    | 10
+---------------------------
+
+Optimizing unit popcount ...
+
+Optimizing unit shift_register ...
+
+Optimizing unit popcount_asm ...
+
+Mapping all equations...
+Building and optimizing final netlist ...
+Found area constraint ratio of 100 (+ 0) on block popcount, actual ratio is 0.
+FlipFlop reg0/t_7 has been replicated 1 time(s) to handle iob=true attribute.
+
+Final Macro Processing ...
+
+=========================================================================
+Final Register Report
+
+Macro Statistics
+# Registers                                            : 40
+ Flip-Flops                                            : 40
+
+=========================================================================
+
+=========================================================================
+*                           Partition Report                            *
+=========================================================================
+
+Partition Implementation Status
+-------------------------------
+
+  No Partitions were found in this design.
+
+-------------------------------
+
+=========================================================================
+*                            Design Summary                             *
+=========================================================================
+
+Top Level Output File Name         : syn.ngc
+
+Primitive and Black Box Usage:
+------------------------------
+# BELS                             : 106
+#      GND                         : 1
+#      INV                         : 2
+#      LUT1                        : 24
+#      LUT2                        : 4
+#      LUT3                        : 4
+#      LUT4                        : 10
+#      LUT5                        : 8
+#      LUT6                        : 3
+#      MUXCY                       : 24
+#      VCC                         : 1
+#      XORCY                       : 25
+# FlipFlops/Latches                : 44
+#      FDC                         : 27
+#      FDCE                        : 13
+#      LD                          : 4
+# Clock Buffers                    : 1
+#      BUFGP                       : 1
+# IO Buffers                       : 25
+#      IBUF                        : 10
+#      OBUF                        : 15
+
+Device utilization summary:
+---------------------------
+
+Selected Device : 6slx16csg324-3 
+
+
+Slice Logic Utilization: 
+ Number of Slice Registers:              43  out of  18224     0%  
+ Number of Slice LUTs:                   55  out of   9112     0%  
+    Number used as Logic:                55  out of   9112     0%  
+
+Slice Logic Distribution: 
+ Number of LUT Flip Flop pairs used:     56
+   Number with an unused Flip Flop:      13  out of     56    23%  
+   Number with an unused LUT:             1  out of     56     1%  
+   Number of fully used LUT-FF pairs:    42  out of     56    75%  
+   Number of unique control sets:         6
+
+IO Utilization: 
+ Number of IOs:                          26
+ Number of bonded IOBs:                  26  out of    232    11%  
+    IOB Flip Flops/Latches:               1
+
+Specific Feature Utilization:
+ Number of BUFG/BUFGCTRLs:                1  out of     16     6%  
+
+---------------------------
+Partition Resource Summary:
+---------------------------
+
+  No Partitions were found in this design.
+
+---------------------------
+
+
+=========================================================================
+Timing Report
+
+NOTE: THESE TIMING NUMBERS ARE ONLY A SYNTHESIS ESTIMATE.
+      FOR ACCURATE TIMING INFORMATION PLEASE REFER TO THE TRACE REPORT
+      GENERATED AFTER PLACE-and-ROUTE.
+
+Clock Information:
+------------------
+---------------------------------------------------------------------------------------+-----------------------------+-------+
+Clock Signal                                                                           | Clock buffer(FF name)       | Load  |
+---------------------------------------------------------------------------------------+-----------------------------+-------+
+clk                                                                                    | BUFGP                       | 25    |
+clk_div0/t_24                                                                          | NONE(counter0/t_0)          | 15    |
+popcount_asm0/this_s_FSM_FFd1                                                          | NONE(popcount_asm0/count_0) | 2     |
+popcount_asm0/this_s[1]_PWR_20_o_Mux_15_o(popcount_asm0/this_s[1]_PWR_20_o_Mux_15_o1:O)| NONE(*)(popcount_asm0/reg_1)| 2     |
+---------------------------------------------------------------------------------------+-----------------------------+-------+
+(*) This 1 clock signal(s) are generated by combinatorial logic,
+and XST is not able to identify which are the primary clock signals.
+Please use the CLOCK_SIGNAL constraint to specify the clock signal(s) generated by combinatorial logic.
+INFO:Xst:2169 - HDL ADVISOR - Some clock signals were not automatically buffered by XST with BUFG/BUFR resources. Please use the buffer_type constraint in order to insert these buffers to the clock signals to help prevent skew problems.
+
+Asynchronous Control Signals Information:
+----------------------------------------
+No asynchronous control signals found in this design
+
+Timing Summary:
+---------------
+Speed Grade: -3
+
+   Minimum period: 2.558ns (Maximum Frequency: 391.007MHz)
+   Minimum input arrival time before clock: 3.057ns
+   Maximum output required time after clock: 5.053ns
+   Maximum combinational path delay: No path found
+
+Timing Details:
+---------------
+All values displayed in nanoseconds (ns)
+
+=========================================================================
+Timing constraint: Default period analysis for Clock 'clk'
+  Clock period: 2.123ns (frequency: 471.065MHz)
+  Total number of paths / destination ports: 325 / 25
+-------------------------------------------------------------------------
+Delay:               2.123ns (Levels of Logic = 26)
+  Source:            clk_div0/t_0 (FF)
+  Destination:       clk_div0/t_24 (FF)
+  Source Clock:      clk rising
+  Destination Clock: clk rising
+
+  Data Path: clk_div0/t_0 to clk_div0/t_24
+                                Gate     Net
+    Cell:in->out      fanout   Delay   Delay  Logical Name (Net Name)
+    ----------------------------------------  ------------
+     FDC:C->Q              1   0.447   0.579  clk_div0/t_0 (clk_div0/t_0)
+     INV:I->O              1   0.206   0.000  clk_div0/Mcount_t_lut[0]_INV_0 (clk_div0/Mcount_t_lut[0])
+     MUXCY:S->O            1   0.172   0.000  clk_div0/Mcount_t_cy[0] (clk_div0/Mcount_t_cy[0])
+     MUXCY:CI->O           1   0.019   0.000  clk_div0/Mcount_t_cy[1] (clk_div0/Mcount_t_cy[1])
+     MUXCY:CI->O           1   0.019   0.000  clk_div0/Mcount_t_cy[2] (clk_div0/Mcount_t_cy[2])
+     MUXCY:CI->O           1   0.019   0.000  clk_div0/Mcount_t_cy[3] (clk_div0/Mcount_t_cy[3])
+     MUXCY:CI->O           1   0.019   0.000  clk_div0/Mcount_t_cy[4] (clk_div0/Mcount_t_cy[4])
+     MUXCY:CI->O           1   0.019   0.000  clk_div0/Mcount_t_cy[5] (clk_div0/Mcount_t_cy[5])
+     MUXCY:CI->O           1   0.019   0.000  clk_div0/Mcount_t_cy[6] (clk_div0/Mcount_t_cy[6])
+     MUXCY:CI->O           1   0.019   0.000  clk_div0/Mcount_t_cy[7] (clk_div0/Mcount_t_cy[7])
+     MUXCY:CI->O           1   0.019   0.000  clk_div0/Mcount_t_cy[8] (clk_div0/Mcount_t_cy[8])
+     MUXCY:CI->O           1   0.019   0.000  clk_div0/Mcount_t_cy[9] (clk_div0/Mcount_t_cy[9])
+     MUXCY:CI->O           1   0.019   0.000  clk_div0/Mcount_t_cy[10] (clk_div0/Mcount_t_cy[10])
+     MUXCY:CI->O           1   0.019   0.000  clk_div0/Mcount_t_cy[11] (clk_div0/Mcount_t_cy[11])
+     MUXCY:CI->O           1   0.019   0.000  clk_div0/Mcount_t_cy[12] (clk_div0/Mcount_t_cy[12])
+     MUXCY:CI->O           1   0.019   0.000  clk_div0/Mcount_t_cy[13] (clk_div0/Mcount_t_cy[13])
+     MUXCY:CI->O           1   0.019   0.000  clk_div0/Mcount_t_cy[14] (clk_div0/Mcount_t_cy[14])
+     MUXCY:CI->O           1   0.019   0.000  clk_div0/Mcount_t_cy[15] (clk_div0/Mcount_t_cy[15])
+     MUXCY:CI->O           1   0.019   0.000  clk_div0/Mcount_t_cy[16] (clk_div0/Mcount_t_cy[16])
+     MUXCY:CI->O           1   0.019   0.000  clk_div0/Mcount_t_cy[17] (clk_div0/Mcount_t_cy[17])
+     MUXCY:CI->O           1   0.019   0.000  clk_div0/Mcount_t_cy[18] (clk_div0/Mcount_t_cy[18])
+     MUXCY:CI->O           1   0.019   0.000  clk_div0/Mcount_t_cy[19] (clk_div0/Mcount_t_cy[19])
+     MUXCY:CI->O           1   0.019   0.000  clk_div0/Mcount_t_cy[20] (clk_div0/Mcount_t_cy[20])
+     MUXCY:CI->O           1   0.019   0.000  clk_div0/Mcount_t_cy[21] (clk_div0/Mcount_t_cy[21])
+     MUXCY:CI->O           1   0.019   0.000  clk_div0/Mcount_t_cy[22] (clk_div0/Mcount_t_cy[22])
+     MUXCY:CI->O           0   0.019   0.000  clk_div0/Mcount_t_cy[23] (clk_div0/Mcount_t_cy[23])
+     XORCY:CI->O           1   0.180   0.000  clk_div0/Mcount_t_xor[24] (Result[24])
+     FDC:D                     0.102          clk_div0/t_24
+    ----------------------------------------
+    Total                      2.123ns (1.544ns logic, 0.579ns route)
+                                       (72.7% logic, 27.3% route)
+
+=========================================================================
+Timing constraint: Default period analysis for Clock 'clk_div0/t_24'
+  Clock period: 2.558ns (frequency: 391.007MHz)
+  Total number of paths / destination ports: 37 / 13
+-------------------------------------------------------------------------
+Delay:               2.558ns (Levels of Logic = 2)
+  Source:            reg0/t_3 (FF)
+  Destination:       popcount_asm0/this_s_FSM_FFd1 (FF)
+  Source Clock:      clk_div0/t_24 rising
+  Destination Clock: clk_div0/t_24 rising
+
+  Data Path: reg0/t_3 to popcount_asm0/this_s_FSM_FFd1
+                                Gate     Net
+    Cell:in->out      fanout   Delay   Delay  Logical Name (Net Name)
+    ----------------------------------------  ------------
+     FDCE:C->Q             3   0.447   0.879  reg0/t_3 (reg0/t_3)
+     LUT3:I0->O            2   0.205   0.721  zero_SW0 (N01)
+     LUT6:I4->O            1   0.203   0.000  popcount_asm0/this_s_FSM_FFd1-In1 (popcount_asm0/this_s_FSM_FFd1-In)
+     FDC:D                     0.102          popcount_asm0/this_s_FSM_FFd1
+    ----------------------------------------
+    Total                      2.558ns (0.957ns logic, 1.601ns route)
+                                       (37.4% logic, 62.6% route)
+
+=========================================================================
+Timing constraint: Default OFFSET IN BEFORE for Clock 'clk'
+  Total number of paths / destination ports: 25 / 25
+-------------------------------------------------------------------------
+Offset:              3.057ns (Levels of Logic = 1)
+  Source:            clr (PAD)
+  Destination:       clk_div0/t_0 (FF)
+  Destination Clock: clk rising
+
+  Data Path: clr to clk_div0/t_0
+                                Gate     Net
+    Cell:in->out      fanout   Delay   Delay  Logical Name (Net Name)
+    ----------------------------------------  ------------
+     IBUF:I->O            40   1.222   1.405  clr_IBUF (clr_IBUF)
+     FDC:CLR                   0.430          clk_div0/t_0
+    ----------------------------------------
+    Total                      3.057ns (1.652ns logic, 1.405ns route)
+                                       (54.0% logic, 46.0% route)
+
+=========================================================================
+Timing constraint: Default OFFSET IN BEFORE for Clock 'clk_div0/t_24'
+  Total number of paths / destination ports: 26 / 26
+-------------------------------------------------------------------------
+Offset:              3.057ns (Levels of Logic = 1)
+  Source:            clr (PAD)
+  Destination:       counter0/t_0 (FF)
+  Destination Clock: clk_div0/t_24 rising
+
+  Data Path: clr to counter0/t_0
+                                Gate     Net
+    Cell:in->out      fanout   Delay   Delay  Logical Name (Net Name)
+    ----------------------------------------  ------------
+     IBUF:I->O            40   1.222   1.405  clr_IBUF (clr_IBUF)
+     FDCE:CLR                  0.430          counter0/t_0
+    ----------------------------------------
+    Total                      3.057ns (1.652ns logic, 1.405ns route)
+                                       (54.0% logic, 46.0% route)
+
+=========================================================================
+Timing constraint: Default OFFSET OUT AFTER for Clock 'clk_div0/t_24'
+  Total number of paths / destination ports: 43 / 15
+-------------------------------------------------------------------------
+Offset:              5.053ns (Levels of Logic = 2)
+  Source:            popcount_asm0/this_s_FSM_FFd1 (FF)
+  Destination:       display7[2] (PAD)
+  Source Clock:      clk_div0/t_24 rising
+
+  Data Path: popcount_asm0/this_s_FSM_FFd1 to display7[2]
+                                Gate     Net
+    Cell:in->out      fanout   Delay   Delay  Logical Name (Net Name)
+    ----------------------------------------  ------------
+     FDC:C->Q             12   0.447   1.253  popcount_asm0/this_s_FSM_FFd1 (popcount_asm0/this_s_FSM_FFd1)
+     LUT5:I0->O            1   0.203   0.579  disp_ca.mux0/Mmux_z31 (display7_2_OBUF)
+     OBUF:I->O                 2.571          display7_2_OBUF (display7[2])
+    ----------------------------------------
+    Total                      5.053ns (3.221ns logic, 1.832ns route)
+                                       (63.7% logic, 36.3% route)
+
+=========================================================================
+
+Cross Clock Domains Report:
+--------------------------
+
+Clock to Setup on destination clock clk
+---------------+---------+---------+---------+---------+
+               | Src:Rise| Src:Fall| Src:Rise| Src:Fall|
+Source Clock   |Dest:Rise|Dest:Rise|Dest:Fall|Dest:Fall|
+---------------+---------+---------+---------+---------+
+clk            |    2.123|         |         |         |
+---------------+---------+---------+---------+---------+
+
+Clock to Setup on destination clock clk_div0/t_24
+-----------------------------------------+---------+---------+---------+---------+
+                                         | Src:Rise| Src:Fall| Src:Rise| Src:Fall|
+Source Clock                             |Dest:Rise|Dest:Rise|Dest:Fall|Dest:Fall|
+-----------------------------------------+---------+---------+---------+---------+
+clk_div0/t_24                            |    2.558|         |         |         |
+popcount_asm0/this_s[1]_PWR_20_o_Mux_15_o|         |    2.786|         |         |
+popcount_asm0/this_s_FSM_FFd1            |    2.525|         |         |         |
+-----------------------------------------+---------+---------+---------+---------+
+
+Clock to Setup on destination clock popcount_asm0/this_s[1]_PWR_20_o_Mux_15_o
+---------------+---------+---------+---------+---------+
+               | Src:Rise| Src:Fall| Src:Rise| Src:Fall|
+Source Clock   |Dest:Rise|Dest:Rise|Dest:Fall|Dest:Fall|
+---------------+---------+---------+---------+---------+
+clk_div0/t_24  |         |         |    1.598|         |
+---------------+---------+---------+---------+---------+
+
+Clock to Setup on destination clock popcount_asm0/this_s_FSM_FFd1
+---------------+---------+---------+---------+---------+
+               | Src:Rise| Src:Fall| Src:Rise| Src:Fall|
+Source Clock   |Dest:Rise|Dest:Rise|Dest:Fall|Dest:Fall|
+---------------+---------+---------+---------+---------+
+clk_div0/t_24  |    1.598|         |         |         |
+---------------+---------+---------+---------+---------+
+
+=========================================================================
+
+
+Total REAL time to Xst completion: 88.00 secs
+Total CPU time to Xst completion: 47.89 secs
+ 
+--> 
+
+
+Total memory usage is 385832 kilobytes
+
+Number of errors   :    0 (   0 filtered)
+Number of warnings :    6 (   0 filtered)
+Number of infos    :    2 (   0 filtered)
+
+</code></pre>
+	<a href="#nav">back to nav</a>
+
+	<h1 id="syn-ngd">NGD <em>syn.bld</em></h1>
+	<a href="#nav">back to nav</a>
+	<pre><code class="language-markdown">Release 14.7 ngdbuild P.20131013 (lin64)
+Copyright (c) 1995-2013 Xilinx, Inc.  All rights reserved.
+
+Command Line: /opt/Xilinx/14.7/ISE_DS/ISE/bin/lin64/unwrapped/ngdbuild -p
+xc6slx16-3-csg324 -uc syn.ucf syn.ngc
+
+Reading NGO file
+"/home/urbo/code/examples/vhdl/escomips/src/08_popcount/_xilinx-popcount.d/nexys
+3/syn.ngc" ...
+Gathering constraint information from source properties...
+Done.
+
+Annotating constraints to design from ucf file "syn.ucf" ...
+Resolving constraint associations...
+Checking Constraint Associations...
+Done...
+
+Checking expanded design ...
+
+Partition Implementation Status
+-------------------------------
+
+  No Partitions were found in this design.
+
+-------------------------------
+
+NGDBUILD Design Results Summary:
+  Number of errors:     0
+  Number of warnings:   0
+
+Total memory usage is 398416 kilobytes
+
+Writing NGD file "syn.ngd" ...
+Total REAL time to NGDBUILD completion:  19 sec
+Total CPU time to NGDBUILD completion:   19 sec
+
+Writing NGDBUILD log file "syn.bld"...
+</code></pre>
+	<a href="#nav">back to nav</a>
+
+	<h1 id="syn-map">MAP <em>syn.map</em></h1>
+	<a href="#nav">back to nav</a>
+	<pre><code class="language-markdown">Release 14.7 Map P.20131013 (lin64)
+Xilinx Map Application Log File for Design 'popcount'
+
+Design Information
+------------------
+Command Line   : map -w -detail -pr b syn.ngd 
+Target Device  : xc6slx16
+Target Package : csg324
+Target Speed   : -3
+Mapper Version : spartan6 -- $Revision: 1.55 $
+Mapped Date    : Thu Jul 16 06:48:40 2015
+
+Mapping design into LUTs...
+Writing file syn.ngm...
+Running directed packing...
+Running delay-based LUT packing...
+Updating timing models...
+INFO:Map:215 - The Interim Design Summary has been generated in the MAP Report
+   (.mrp).
+Running timing-driven placement...
+Total REAL time at the beginning of Placer: 25 secs 
+Total CPU  time at the beginning of Placer: 25 secs 
+
+Phase 1.1  Initial Placement Analysis
+Phase 1.1  Initial Placement Analysis (Checksum:4c50c671) REAL time: 27 secs 
+
+Phase 2.7  Design Feasibility Check
+INFO:Place:834 - Only a subset of IOs are locked. Out of 26 IOs, 18 are locked
+   and 8 are not locked. If you would like to print the names of these IOs,
+   please set the environment variable XIL_PAR_DESIGN_CHECK_VERBOSE to 1. 
+Phase 2.7  Design Feasibility Check (Checksum:4c50c671) REAL time: 28 secs 
+
+Phase 3.31  Local Placement Optimization
+Phase 3.31  Local Placement Optimization (Checksum:4c50c671) REAL time: 28 secs 
+
+Phase 4.2  Initial Placement for Architecture Specific Features
+....
+Phase 4.2  Initial Placement for Architecture Specific Features
+(Checksum:4c50c671) REAL time: 34 secs 
+
+Phase 5.36  Local Placement Optimization
+Phase 5.36  Local Placement Optimization (Checksum:4c50c671) REAL time: 34 secs 
+
+Phase 6.30  Global Clock Region Assignment
+Phase 6.30  Global Clock Region Assignment (Checksum:4c50c671) REAL time: 34 secs 
+
+Phase 7.3  Local Placement Optimization
+...
+Phase 7.3  Local Placement Optimization (Checksum:d59a99f1) REAL time: 36 secs 
+
+Phase 8.5  Local Placement Optimization
+Phase 8.5  Local Placement Optimization (Checksum:d59a99f1) REAL time: 36 secs 
+
+Phase 9.8  Global Placement
+.....
+.....
+Phase 9.8  Global Placement (Checksum:74cde421) REAL time: 36 secs 
+
+Phase 10.5  Local Placement Optimization
+Phase 10.5  Local Placement Optimization (Checksum:74cde421) REAL time: 36 secs 
+
+Phase 11.18  Placement Optimization
+Phase 11.18  Placement Optimization (Checksum:21c1ce51) REAL time: 37 secs 
+
+Phase 12.5  Local Placement Optimization
+Phase 12.5  Local Placement Optimization (Checksum:21c1ce51) REAL time: 37 secs 
+
+Phase 13.34  Placement Validation
+Phase 13.34  Placement Validation (Checksum:21c1ce51) REAL time: 37 secs 
+
+Total REAL time to Placer completion: 37 secs 
+Total CPU  time to Placer completion: 37 secs 
+Running post-placement packing...
+Writing output files...
+WARNING:PhysDesignRules:372 - Gated clock. Clock net
+   popcount_asm0/this_s[1]_PWR_20_o_Mux_15_o is sourced by a combinatorial pin.
+   This is not good design practice. Use the CE pin to control the loading of
+   data into the flip-flop.
+
+Design Summary
+--------------
+
+Design Summary:
+Number of errors:      0
+Number of warnings:    1
+Slice Logic Utilization:
+  Number of Slice Registers:                    43 out of  18,224    1%
+    Number used as Flip Flops:                  39
+    Number used as Latches:                      4
+    Number used as Latch-thrus:                  0
+    Number used as AND/OR logics:                0
+  Number of Slice LUTs:                         46 out of   9,112    1%
+    Number used as logic:                       45 out of   9,112    1%
+      Number using O6 output only:              13
+      Number using O5 output only:              23
+      Number using O5 and O6:                    9
+      Number used as ROM:                        0
+    Number used as Memory:                       0 out of   2,176    0%
+    Number used exclusively as route-thrus:      1
+      Number with same-slice register load:      0
+      Number with same-slice carry load:         1
+      Number with other load:                    0
+
+Slice Logic Distribution:
+  Number of occupied Slices:                    18 out of   2,278    1%
+  Number of MUXCYs used:                        28 out of   4,556    1%
+  Number of LUT Flip Flop pairs used:           50
+    Number with an unused Flip Flop:             8 out of      50   16%
+    Number with an unused LUT:                   4 out of      50    8%
+    Number of fully used LUT-FF pairs:          38 out of      50   76%
+    Number of unique control sets:               6
+    Number of slice register sites lost
+      to control set restrictions:              29 out of  18,224    1%
+
+  A LUT Flip Flop pair for this architecture represents one LUT paired with
+  one Flip Flop within a slice.  A control set is a unique combination of
+  clock, reset, set, and enable signals for a registered element.
+  The Slice Logic Distribution report is not meaningful if the design is
+  over-mapped for a non-slice resource or if Placement fails.
+
+IO Utilization:
+  Number of bonded IOBs:                        26 out of     232   11%
+    Number of LOCed IOBs:                       18 out of      26   69%
+    IOB Flip Flops:                              1
+
+Specific Feature Utilization:
+  Number of RAMB16BWERs:                         0 out of      32    0%
+  Number of RAMB8BWERs:                          0 out of      64    0%
+  Number of BUFIO2/BUFIO2_2CLKs:                 0 out of      32    0%
+  Number of BUFIO2FB/BUFIO2FB_2CLKs:             0 out of      32    0%
+  Number of BUFG/BUFGMUXs:                       1 out of      16    6%
+    Number used as BUFGs:                        1
+    Number used as BUFGMUX:                      0
+  Number of DCM/DCM_CLKGENs:                     0 out of       4    0%
+  Number of ILOGIC2/ISERDES2s:                   0 out of     248    0%
+  Number of IODELAY2/IODRP2/IODRP2_MCBs:         0 out of     248    0%
+  Number of OLOGIC2/OSERDES2s:                   1 out of     248    1%
+    Number used as OLOGIC2s:                     1
+    Number used as OSERDES2s:                    0
+  Number of BSCANs:                              0 out of       4    0%
+  Number of BUFHs:                               0 out of     128    0%
+  Number of BUFPLLs:                             0 out of       8    0%
+  Number of BUFPLL_MCBs:                         0 out of       4    0%
+  Number of DSP48A1s:                            0 out of      32    0%
+  Number of ICAPs:                               0 out of       1    0%
+  Number of MCBs:                                0 out of       2    0%
+  Number of PCILOGICSEs:                         0 out of       2    0%
+  Number of PLL_ADVs:                            0 out of       2    0%
+  Number of PMVs:                                0 out of       1    0%
+  Number of STARTUPs:                            0 out of       1    0%
+  Number of SUSPEND_SYNCs:                       0 out of       1    0%
+
+Average Fanout of Non-Clock Nets:                2.56
+
+Peak Memory Usage:  693 MB
+Total REAL time to MAP completion:  39 secs 
+Total CPU time to MAP completion:   39 secs 
+
+Mapping completed.
+See MAP report file "syn.mrp" for details.
+</code></pre>
+	<a href="#nav">back to nav</a>
+
+	<h1 id="syn-mrp">MRP <em>syn.mrp</em></h1>
+	<a href="#nav">back to nav</a>
+	<pre><code class="language-markdown">Release 14.7 Map P.20131013 (lin64)
+Xilinx Mapping Report File for Design 'popcount'
+
+Design Information
+------------------
+Command Line   : map -w -detail -pr b syn.ngd 
+Target Device  : xc6slx16
+Target Package : csg324
+Target Speed   : -3
+Mapper Version : spartan6 -- $Revision: 1.55 $
+Mapped Date    : Thu Jul 16 06:48:40 2015
+
+Design Summary
+--------------
+Number of errors:      0
+Number of warnings:    1
+Slice Logic Utilization:
+  Number of Slice Registers:                    43 out of  18,224    1%
+    Number used as Flip Flops:                  39
+    Number used as Latches:                      4
+    Number used as Latch-thrus:                  0
+    Number used as AND/OR logics:                0
+  Number of Slice LUTs:                         46 out of   9,112    1%
+    Number used as logic:                       45 out of   9,112    1%
+      Number using O6 output only:              13
+      Number using O5 output only:              23
+      Number using O5 and O6:                    9
+      Number used as ROM:                        0
+    Number used as Memory:                       0 out of   2,176    0%
+    Number used exclusively as route-thrus:      1
+      Number with same-slice register load:      0
+      Number with same-slice carry load:         1
+      Number with other load:                    0
+
+Slice Logic Distribution:
+  Number of occupied Slices:                    18 out of   2,278    1%
+  Number of MUXCYs used:                        28 out of   4,556    1%
+  Number of LUT Flip Flop pairs used:           50
+    Number with an unused Flip Flop:             8 out of      50   16%
+    Number with an unused LUT:                   4 out of      50    8%
+    Number of fully used LUT-FF pairs:          38 out of      50   76%
+    Number of unique control sets:               6
+    Number of slice register sites lost
+      to control set restrictions:              29 out of  18,224    1%
+
+  A LUT Flip Flop pair for this architecture represents one LUT paired with
+  one Flip Flop within a slice.  A control set is a unique combination of
+  clock, reset, set, and enable signals for a registered element.
+  The Slice Logic Distribution report is not meaningful if the design is
+  over-mapped for a non-slice resource or if Placement fails.
+
+IO Utilization:
+  Number of bonded IOBs:                        26 out of     232   11%
+    Number of LOCed IOBs:                       18 out of      26   69%
+    IOB Flip Flops:                              1
+
+Specific Feature Utilization:
+  Number of RAMB16BWERs:                         0 out of      32    0%
+  Number of RAMB8BWERs:                          0 out of      64    0%
+  Number of BUFIO2/BUFIO2_2CLKs:                 0 out of      32    0%
+  Number of BUFIO2FB/BUFIO2FB_2CLKs:             0 out of      32    0%
+  Number of BUFG/BUFGMUXs:                       1 out of      16    6%
+    Number used as BUFGs:                        1
+    Number used as BUFGMUX:                      0
+  Number of DCM/DCM_CLKGENs:                     0 out of       4    0%
+  Number of ILOGIC2/ISERDES2s:                   0 out of     248    0%
+  Number of IODELAY2/IODRP2/IODRP2_MCBs:         0 out of     248    0%
+  Number of OLOGIC2/OSERDES2s:                   1 out of     248    1%
+    Number used as OLOGIC2s:                     1
+    Number used as OSERDES2s:                    0
+  Number of BSCANs:                              0 out of       4    0%
+  Number of BUFHs:                               0 out of     128    0%
+  Number of BUFPLLs:                             0 out of       8    0%
+  Number of BUFPLL_MCBs:                         0 out of       4    0%
+  Number of DSP48A1s:                            0 out of      32    0%
+  Number of ICAPs:                               0 out of       1    0%
+  Number of MCBs:                                0 out of       2    0%
+  Number of PCILOGICSEs:                         0 out of       2    0%
+  Number of PLL_ADVs:                            0 out of       2    0%
+  Number of PMVs:                                0 out of       1    0%
+  Number of STARTUPs:                            0 out of       1    0%
+  Number of SUSPEND_SYNCs:                       0 out of       1    0%
+
+Average Fanout of Non-Clock Nets:                2.56
+
+Peak Memory Usage:  693 MB
+Total REAL time to MAP completion:  39 secs 
+Total CPU time to MAP completion:   39 secs 
+
+Table of Contents
+-----------------
+Section 1 - Errors
+Section 2 - Warnings
+Section 3 - Informational
+Section 4 - Removed Logic Summary
+Section 5 - Removed Logic
+Section 6 - IOB Properties
+Section 7 - RPMs
+Section 8 - Guide Report
+Section 9 - Area Group and Partition Summary
+Section 10 - Timing Report
+Section 11 - Configuration String Information
+Section 12 - Control Set Information
+Section 13 - Utilization by Hierarchy
+
+Section 1 - Errors
+------------------
+
+Section 2 - Warnings
+--------------------
+WARNING:PhysDesignRules:372 - Gated clock. Clock net
+   popcount_asm0/this_s[1]_PWR_20_o_Mux_15_o is sourced by a combinatorial pin.
+   This is not good design practice. Use the CE pin to control the loading of
+   data into the flip-flop.
+
+Section 3 - Informational
+-------------------------
+INFO:MapLib:562 - No environment variables are currently set.
+INFO:LIT:244 - All of the single ended outputs in this design are using slew
+   rate limited output drivers. The delay on speed critical single ended outputs
+   can be dramatically reduced by designating them as fast outputs.
+INFO:Pack:1716 - Initializing temperature to 85.000 Celsius. (default - Range:
+   0.000 to 85.000 Celsius)
+INFO:Pack:1720 - Initializing voltage to 1.140 Volts. (default - Range: 1.140 to
+   1.260 Volts)
+INFO:Map:215 - The Interim Design Summary has been generated in the MAP Report
+   (.mrp).
+INFO:Place:834 - Only a subset of IOs are locked. Out of 26 IOs, 18 are locked
+   and 8 are not locked. If you would like to print the names of these IOs,
+   please set the environment variable XIL_PAR_DESIGN_CHECK_VERBOSE to 1. 
+INFO:Pack:1650 - Map created a placed design.
+
+Section 4 - Removed Logic Summary
+---------------------------------
+   2 block(s) optimized away
+  25 Block(s) redundant
+
+Section 5 - Removed Logic
+-------------------------
+
+Optimized Block(s):
+TYPE 		BLOCK
+GND 		XST_GND
+VCC 		XST_VCC
+
+Redundant Block(s):
+TYPE 		BLOCK
+LUT1 		clk_div0/Mcount_t_cy[1]_rt
+LUT1 		clk_div0/Mcount_t_cy[2]_rt
+LUT1 		clk_div0/Mcount_t_cy[3]_rt
+LUT1 		clk_div0/Mcount_t_cy[4]_rt
+LUT1 		clk_div0/Mcount_t_cy[5]_rt
+LUT1 		clk_div0/Mcount_t_cy[6]_rt
+LUT1 		clk_div0/Mcount_t_cy[7]_rt
+LUT1 		clk_div0/Mcount_t_cy[8]_rt
+LUT1 		clk_div0/Mcount_t_cy[9]_rt
+LUT1 		clk_div0/Mcount_t_cy[10]_rt
+LUT1 		clk_div0/Mcount_t_cy[11]_rt
+LUT1 		clk_div0/Mcount_t_cy[12]_rt
+LUT1 		clk_div0/Mcount_t_cy[13]_rt
+LUT1 		clk_div0/Mcount_t_cy[14]_rt
+LUT1 		clk_div0/Mcount_t_cy[15]_rt
+LUT1 		clk_div0/Mcount_t_cy[16]_rt
+LUT1 		clk_div0/Mcount_t_cy[17]_rt
+LUT1 		clk_div0/Mcount_t_cy[18]_rt
+LUT1 		clk_div0/Mcount_t_cy[19]_rt
+LUT1 		clk_div0/Mcount_t_cy[20]_rt
+LUT1 		clk_div0/Mcount_t_cy[21]_rt
+LUT1 		clk_div0/Mcount_t_cy[22]_rt
+LUT1 		clk_div0/Mcount_t_cy[23]_rt
+LUT1 		clk_div0/Mcount_t_xor[24]_rt
+INV 		popcount_asm0/this_s__n0040[1]1_INV_0
+
+Section 6 - IOB Properties
+--------------------------
+
++---------------------------------------------------------------------------------------------------------------------------------------------------------+
+| IOB Name                           | Type             | Direction | IO Standard          | Diff  | Drive    | Slew | Reg (s)      | Resistor | IOB      |
+|                                    |                  |           |                      | Term  | Strength | Rate |              |          | Delay    |
++---------------------------------------------------------------------------------------------------------------------------------------------------------+
+| a[0]                               | IOB              | OUTPUT    | LVCMOS25             |       | 12       | SLOW |              |          |          |
+| a[1]                               | IOB              | OUTPUT    | LVCMOS25             |       | 12       | SLOW |              |          |          |
+| a[2]                               | IOB              | OUTPUT    | LVCMOS25             |       | 12       | SLOW |              |          |          |
+| a[3]                               | IOB              | OUTPUT    | LVCMOS25             |       | 12       | SLOW |              |          |          |
+| a[4]                               | IOB              | OUTPUT    | LVCMOS25             |       | 12       | SLOW |              |          |          |
+| a[5]                               | IOB              | OUTPUT    | LVCMOS25             |       | 12       | SLOW |              |          |          |
+| a[6]                               | IOB              | OUTPUT    | LVCMOS25             |       | 12       | SLOW |              |          |          |
+| a[7]                               | IOB              | OUTPUT    | LVCMOS25             |       | 12       | SLOW | OFF          |          |          |
+| clk                                | IOB              | INPUT     | LVCMOS25             |       |          |      |              |          |          |
+| clr                                | IOB              | INPUT     | LVCMOS25             |       |          |      |              |          |          |
+| d[0]                               | IOB              | INPUT     | LVCMOS25             |       |          |      |              |          |          |
+| d[1]                               | IOB              | INPUT     | LVCMOS25             |       |          |      |              |          |          |
+| d[2]                               | IOB              | INPUT     | LVCMOS25             |       |          |      |              |          |          |
+| d[3]                               | IOB              | INPUT     | LVCMOS25             |       |          |      |              |          |          |
+| d[4]                               | IOB              | INPUT     | LVCMOS25             |       |          |      |              |          |          |
+| d[5]                               | IOB              | INPUT     | LVCMOS25             |       |          |      |              |          |          |
+| d[6]                               | IOB              | INPUT     | LVCMOS25             |       |          |      |              |          |          |
+| d[7]                               | IOB              | INPUT     | LVCMOS25             |       |          |      |              |          |          |
+| display7[0]                        | IOB              | OUTPUT    | LVCMOS25             |       | 12       | SLOW |              |          |          |
+| display7[1]                        | IOB              | OUTPUT    | LVCMOS25             |       | 12       | SLOW |              |          |          |
+| display7[2]                        | IOB              | OUTPUT    | LVCMOS25             |       | 12       | SLOW |              |          |          |
+| display7[3]                        | IOB              | OUTPUT    | LVCMOS25             |       | 12       | SLOW |              |          |          |
+| display7[4]                        | IOB              | OUTPUT    | LVCMOS25             |       | 12       | SLOW |              |          |          |
+| display7[5]                        | IOB              | OUTPUT    | LVCMOS25             |       | 12       | SLOW |              |          |          |
+| display7[6]                        | IOB              | OUTPUT    | LVCMOS25             |       | 12       | SLOW |              |          |          |
+| init                               | IOB              | INPUT     | LVCMOS25             |       |          |      |              |          |          |
++---------------------------------------------------------------------------------------------------------------------------------------------------------+
+
+Section 7 - RPMs
+----------------
+
+Section 8 - Guide Report
+------------------------
+Guide not run on this design.
+
+Section 9 - Area Group and Partition Summary
+--------------------------------------------
+
+Partition Implementation Status
+-------------------------------
+
+  No Partitions were found in this design.
+
+-------------------------------
+
+Area Group Information
+----------------------
+
+  No area groups were found in this design.
+
+----------------------
+
+Section 10 - Timing Report
+--------------------------
+A logic-level (pre-route) timing report can be generated by using Xilinx static
+timing analysis tools, Timing Analyzer (GUI) or TRCE (command line), with the
+mapped NCD and PCF files. Please note that this timing report will be generated
+using estimated delay information. For accurate numbers, please generate a
+timing report with the post Place and Route NCD file.
+
+For more information about the Timing Analyzer, consult the Xilinx Timing
+Analyzer Reference Manual; for more information about TRCE, consult the Xilinx
+Command Line Tools User Guide "TRACE" chapter.
+
+Section 11 - Configuration String Details
+-----------------------------------------
+
+Section 12 - Control Set Information
+------------------------------------
++----------------------------------------------------------------------------------------------------------------------------------+
+| Clock Signal                               | Reset Signal | Set Signal | Enable Signal       | Slice Load Count | Bel Load Count |
++----------------------------------------------------------------------------------------------------------------------------------+
+| clk_BUFGP                                  | clr_IBUF     |            |                     | 7                | 25             |
++----------------------------------------------------------------------------------------------------------------------------------+
+| clk_div0/t[24]                             | clr_IBUF     |            |                     | 1                | 2              |
+| clk_div0/t[24]                             | clr_IBUF     |            | counter0/_n0026_inv | 1                | 4              |
+| clk_div0/t[24]                             | clr_IBUF     |            | reg0/_n0023_inv     | 3                | 8              |
++----------------------------------------------------------------------------------------------------------------------------------+
+| popcount_asm0/this_s_FSM_FFd1              |              |            |                     | 1                | 2              |
++----------------------------------------------------------------------------------------------------------------------------------+
+| ~popcount_asm0/this_s[1]_PWR_20_o_Mux_15_o |              |            |                     | 1                | 2              |
++----------------------------------------------------------------------------------------------------------------------------------+
+
+Section 13 - Utilization by Hierarchy
+-------------------------------------
++--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Module             | Partition | Slices*       | Slice Reg     | LUTs          | LUTRAM        | BRAM/FIFO | DSP48A1 | BUFG  | BUFIO | BUFR  | DCM   | PLL_ADV   | Full Hierarchical Name  |
++--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| popcount/          |           | 2/21          | 0/43          | 3/46          | 0/0           | 0/0       | 0/0     | 1/1   | 0/0   | 0/0   | 0/0   | 0/0       | popcount                |
+| +clk_div0          |           | 7/7           | 25/25         | 25/25         | 0/0           | 0/0       | 0/0     | 0/0   | 0/0   | 0/0   | 0/0   | 0/0       | popcount/clk_div0       |
+| +counter0          |           | 1/1           | 4/4           | 3/3           | 0/0           | 0/0       | 0/0     | 0/0   | 0/0   | 0/0   | 0/0   | 0/0       | popcount/counter0       |
+| +disp_ca.mux0      |           | 4/4           | 0/0           | 4/4           | 0/0           | 0/0       | 0/0     | 0/0   | 0/0   | 0/0   | 0/0   | 0/0       | popcount/disp_ca.mux0   |
+| +popcount_asm0     |           | 4/4           | 6/6           | 4/4           | 0/0           | 0/0       | 0/0     | 0/0   | 0/0   | 0/0   | 0/0   | 0/0       | popcount/popcount_asm0  |
+| +reg0              |           | 3/3           | 8/8           | 7/7           | 0/0           | 0/0       | 0/0     | 0/0   | 0/0   | 0/0   | 0/0   | 0/0       | popcount/reg0           |
++--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+
+* Slices can be packed with basic elements from multiple hierarchies.
+  Therefore, a slice will be counted in every hierarchical module
+  that each of its packed basic elements belong to.
+** For each column, there are two numbers reported <A>/<B>.
+   <A> is the number of elements that belong to that specific hierarchical module.
+   <B> is the total number of elements from that hierarchical module and any lower level
+   hierarchical modules below.
+*** The LUTRAM column counts all LUTs used as memory including RAM, ROM, and shift registers.
+</code></pre>
+	<a href="#nav">back to nav</a>
+
+	<h1 id="syn-par">PAR <em>syn-routed.par</em></h1>
+	<a href="#nav">back to nav</a>
+	<pre><code class="language-markdown">Release 14.7 par P.20131013 (lin64)
+Copyright (c) 1995-2013 Xilinx, Inc.  All rights reserved.
+
+xhztan::  Thu Jul 16 06:49:25 2015
+
+par -w syn.ncd syn-routed.ncd syn.pcf 
+
+
+Constraints file: syn.pcf.
+Loading device for application Rf_Device from file '6slx16.nph' in environment /opt/Xilinx/14.7/ISE_DS/ISE/.
+   "popcount" is an NCD, version 3.2, device xc6slx16, package csg324, speed -3
+
+Initializing temperature to 85.000 Celsius. (default - Range: 0.000 to 85.000 Celsius)
+Initializing voltage to 1.140 Volts. (default - Range: 1.140 to 1.260 Volts)
+
+INFO:Par:282 - No user timing constraints were detected or you have set the option to ignore timing constraints ("par
+   -x"). Place and Route will run in "Performance Evaluation Mode" to automatically improve the performance of all
+   internal clocks in this design. Because there are not defined timing requirements, a timing score will not be
+   reported in the PAR report in this mode. The PAR timing summary will list the performance achieved for each clock.
+   Note: For the fastest runtime, set the effort level to "std".  For best performance, set the effort level to "high".
+
+Device speed data version:  "PRODUCTION 1.23 2013-10-13".
+
+
+
+Device Utilization Summary:
+
+Slice Logic Utilization:
+  Number of Slice Registers:                    43 out of  18,224    1%
+    Number used as Flip Flops:                  39
+    Number used as Latches:                      4
+    Number used as Latch-thrus:                  0
+    Number used as AND/OR logics:                0
+  Number of Slice LUTs:                         46 out of   9,112    1%
+    Number used as logic:                       45 out of   9,112    1%
+      Number using O6 output only:              13
+      Number using O5 output only:              23
+      Number using O5 and O6:                    9
+      Number used as ROM:                        0
+    Number used as Memory:                       0 out of   2,176    0%
+    Number used exclusively as route-thrus:      1
+      Number with same-slice register load:      0
+      Number with same-slice carry load:         1
+      Number with other load:                    0
+
+Slice Logic Distribution:
+  Number of occupied Slices:                    18 out of   2,278    1%
+  Number of MUXCYs used:                        28 out of   4,556    1%
+  Number of LUT Flip Flop pairs used:           50
+    Number with an unused Flip Flop:             8 out of      50   16%
+    Number with an unused LUT:                   4 out of      50    8%
+    Number of fully used LUT-FF pairs:          38 out of      50   76%
+    Number of slice register sites lost
+      to control set restrictions:               0 out of  18,224    0%
+
+  A LUT Flip Flop pair for this architecture represents one LUT paired with
+  one Flip Flop within a slice.  A control set is a unique combination of
+  clock, reset, set, and enable signals for a registered element.
+  The Slice Logic Distribution report is not meaningful if the design is
+  over-mapped for a non-slice resource or if Placement fails.
+
+IO Utilization:
+  Number of bonded IOBs:                        26 out of     232   11%
+    Number of LOCed IOBs:                       18 out of      26   69%
+    IOB Flip Flops:                              1
+
+Specific Feature Utilization:
+  Number of RAMB16BWERs:                         0 out of      32    0%
+  Number of RAMB8BWERs:                          0 out of      64    0%
+  Number of BUFIO2/BUFIO2_2CLKs:                 0 out of      32    0%
+  Number of BUFIO2FB/BUFIO2FB_2CLKs:             0 out of      32    0%
+  Number of BUFG/BUFGMUXs:                       1 out of      16    6%
+    Number used as BUFGs:                        1
+    Number used as BUFGMUX:                      0
+  Number of DCM/DCM_CLKGENs:                     0 out of       4    0%
+  Number of ILOGIC2/ISERDES2s:                   0 out of     248    0%
+  Number of IODELAY2/IODRP2/IODRP2_MCBs:         0 out of     248    0%
+  Number of OLOGIC2/OSERDES2s:                   1 out of     248    1%
+    Number used as OLOGIC2s:                     1
+    Number used as OSERDES2s:                    0
+  Number of BSCANs:                              0 out of       4    0%
+  Number of BUFHs:                               0 out of     128    0%
+  Number of BUFPLLs:                             0 out of       8    0%
+  Number of BUFPLL_MCBs:                         0 out of       4    0%
+  Number of DSP48A1s:                            0 out of      32    0%
+  Number of ICAPs:                               0 out of       1    0%
+  Number of MCBs:                                0 out of       2    0%
+  Number of PCILOGICSEs:                         0 out of       2    0%
+  Number of PLL_ADVs:                            0 out of       2    0%
+  Number of PMVs:                                0 out of       1    0%
+  Number of STARTUPs:                            0 out of       1    0%
+  Number of SUSPEND_SYNCs:                       0 out of       1    0%
+
+
+Overall effort level (-ol):   Standard 
+Router effort level (-rl):    High 
+
+Starting initial Timing Analysis.  REAL time: 21 secs 
+Finished initial Timing Analysis.  REAL time: 21 secs 
+
+Starting Router
+
+
+Phase  1  : 208 unrouted;      REAL time: 22 secs 
+
+Phase  2  : 161 unrouted;      REAL time: 23 secs 
+
+Phase  3  : 35 unrouted;      REAL time: 23 secs 
+
+Phase  4  : 35 unrouted; (Par is working to improve performance)     REAL time: 28 secs 
+
+Updating file: syn-routed.ncd with current fully routed design.
+
+Phase  5  : 0 unrouted; (Par is working to improve performance)     REAL time: 28 secs 
+
+Phase  6  : 0 unrouted; (Par is working to improve performance)     REAL time: 28 secs 
+
+Phase  7  : 0 unrouted; (Par is working to improve performance)     REAL time: 28 secs 
+
+Phase  8  : 0 unrouted; (Par is working to improve performance)     REAL time: 28 secs 
+
+Phase  9  : 0 unrouted; (Par is working to improve performance)     REAL time: 28 secs 
+
+Phase 10  : 0 unrouted; (Par is working to improve performance)     REAL time: 28 secs 
+Total REAL time to Router completion: 28 secs 
+Total CPU time to Router completion: 28 secs 
+
+Partition Implementation Status
+-------------------------------
+
+  No Partitions were found in this design.
+
+-------------------------------
+
+Generating "PAR" statistics.
+INFO:Par:459 - The Clock Report is not displayed in the non timing-driven mode.
+Timing Score: 0 (Setup: 0, Hold: 0)
+
+Asterisk (*) preceding a constraint indicates it was not met.
+   This may be due to a setup or hold violation.
+
+----------------------------------------------------------------------------------------------------------
+  Constraint                                |    Check    | Worst Case |  Best Case | Timing |   Timing   
+                                            |             |    Slack   | Achievable | Errors |    Score   
+----------------------------------------------------------------------------------------------------------
+  Autotimespec constraint for clock net clk | SETUP       |         N/A|     1.882ns|     N/A|           0
+  _BUFGP                                    | HOLD        |     0.503ns|            |       0|           0
+----------------------------------------------------------------------------------------------------------
+  Autotimespec constraint for clock net clk | SETUP       |         N/A|     3.042ns|     N/A|           0
+  _div0/t[24]                               | HOLD        |     0.385ns|            |       0|           0
+----------------------------------------------------------------------------------------------------------
+
+
+All constraints were met.
+INFO:Timing:2761 - N/A entries in the Constraints List may indicate that the 
+   constraint is not analyzed due to the following: No paths covered by this 
+   constraint; Other constraints intersect with this constraint; or This 
+   constraint was disabled by a Path Tracing Control. Please run the Timespec 
+   Interaction Report (TSI) via command line (trce tsi) or Timing Analyzer GUI.
+
+
+Generating Pad Report.
+
+All signals are completely routed.
+
+Total REAL time to PAR completion: 31 secs 
+Total CPU time to PAR completion: 31 secs 
+
+Peak Memory Usage:  640 MB
+
+Placer: Placement generated during map.
+Routing: Completed - No errors found.
+
+Number of error messages: 0
+Number of warning messages: 0
+Number of info messages: 2
+
+Writing design to file syn-routed.ncd
+
+
+
+PAR done!
+</code></pre>
+	<a href="#nav">back to nav</a>
+
+	<h1 id="syn-bit">BIT <em>syn.bgn</em></h1>
+	<a href="#nav">back to nav</a>
+	<pre><code class="language-markdown">Release 14.7 - Bitgen P.20131013 (lin64)
+Copyright (c) 1995-2013 Xilinx, Inc.  All rights reserved.
+Loading device for application Rf_Device from file '6slx16.nph' in environment
+/opt/Xilinx/14.7/ISE_DS/ISE/.
+   "popcount" is an NCD, version 3.2, device xc6slx16, package csg324, speed -3
+Opened constraints file syn.pcf.
+
+Thu Jul 16 06:50:13 2015
+
+/opt/Xilinx/14.7/ISE_DS/ISE/bin/lin64/unwrapped/bitgen -w syn-routed.ncd syn.bit syn.pcf 
+
+Summary of Bitgen Options:
++----------------------+----------------------+
+| Option Name          | Current Setting      |
++----------------------+----------------------+
+| Compress             | (Not Specified)*     |
++----------------------+----------------------+
+| Readback             | (Not Specified)*     |
++----------------------+----------------------+
+| CRC                  | Enable*              |
++----------------------+----------------------+
+| DebugBitstream       | No*                  |
++----------------------+----------------------+
+| ConfigRate           | 2*                   |
++----------------------+----------------------+
+| StartupClk           | Cclk*                |
++----------------------+----------------------+
+| DonePin              | Pullup*              |
++----------------------+----------------------+
+| ProgPin              | Pullup*              |
++----------------------+----------------------+
+| TckPin               | Pullup*              |
++----------------------+----------------------+
+| TdiPin               | Pullup*              |
++----------------------+----------------------+
+| TdoPin               | Pullup*              |
++----------------------+----------------------+
+| TmsPin               | Pullup*              |
++----------------------+----------------------+
+| UnusedPin            | Pulldown*            |
++----------------------+----------------------+
+| GWE_cycle            | 6*                   |
++----------------------+----------------------+
+| GTS_cycle            | 5*                   |
++----------------------+----------------------+
+| LCK_cycle            | NoWait*              |
++----------------------+----------------------+
+| DONE_cycle           | 4*                   |
++----------------------+----------------------+
+| Persist              | No*                  |
++----------------------+----------------------+
+| DriveDone            | No*                  |
++----------------------+----------------------+
+| DonePipe             | No*                  |
++----------------------+----------------------+
+| Security             | None*                |
++----------------------+----------------------+
+| UserID               | 0xFFFFFFFF*          |
++----------------------+----------------------+
+| ActiveReconfig       | No*                  |
++----------------------+----------------------+
+| Partial              | (Not Specified)*     |
++----------------------+----------------------+
+| Encrypt              | No*                  |
++----------------------+----------------------+
+| Key0                 | pick*                |
++----------------------+----------------------+
+| StartCBC             | pick*                |
++----------------------+----------------------+
+| KeyFile              | (Not Specified)*     |
++----------------------+----------------------+
+| drive_awake          | No*                  |
++----------------------+----------------------+
+| Reset_on_err         | No*                  |
++----------------------+----------------------+
+| suspend_filter       | Yes*                 |
++----------------------+----------------------+
+| en_sw_gsr            | No*                  |
++----------------------+----------------------+
+| en_suspend           | No*                  |
++----------------------+----------------------+
+| sw_clk               | Startupclk*          |
++----------------------+----------------------+
+| sw_gwe_cycle         | 5*                   |
++----------------------+----------------------+
+| sw_gts_cycle         | 4*                   |
++----------------------+----------------------+
+| multipin_wakeup      | No*                  |
++----------------------+----------------------+
+| wakeup_mask          | 0x00*                |
++----------------------+----------------------+
+| ExtMasterCclk_en     | No*                  |
++----------------------+----------------------+
+| ExtMasterCclk_divide | 1*                   |
++----------------------+----------------------+
+| CrcCoverage          | No*                  |
++----------------------+----------------------+
+| glutmask             | Yes*                 |
++----------------------+----------------------+
+| next_config_addr     | 0x00000000*          |
++----------------------+----------------------+
+| next_config_new_mode | No*                  |
++----------------------+----------------------+
+| next_config_boot_mode | 001*                 |
++----------------------+----------------------+
+| next_config_register_write | Enable*              |
++----------------------+----------------------+
+| next_config_reboot   | Enable*              |
++----------------------+----------------------+
+| golden_config_addr   | 0x00000000*          |
++----------------------+----------------------+
+| failsafe_user        | 0x0000*              |
++----------------------+----------------------+
+| TIMER_CFG            | None*                |
++----------------------+----------------------+
+| spi_buswidth         | 1*                   |
++----------------------+----------------------+
+| TimeStamp            | Default*             |
++----------------------+----------------------+
+| IEEE1532             | No*                  |
++----------------------+----------------------+
+| Binary               | No*                  |
++----------------------+----------------------+
+ *  Default setting.
+ ** The specified setting matches the default setting.
+
+There were 0 CONFIG constraint(s) processed from syn.pcf.
+
+
+Running DRC.
+WARNING:PhysDesignRules:372 - Gated clock. Clock net
+   popcount_asm0/this_s[1]_PWR_20_o_Mux_15_o is sourced by a combinatorial pin.
+   This is not good design practice. Use the CE pin to control the loading of
+   data into the flip-flop.
+DRC detected 0 errors and 1 warnings.  Please see the previously displayed
+individual error or warning messages for more details.
+Creating bit map...
+Saving bit stream in "syn.bit".
+Bitstream generation is complete.
+</code></pre>
+	<a href="#nav">back to nav</a>
+
+</article>
+	</section>
+
+</body>
+
+</html>

@@ -1,0 +1,31 @@
+net "a[7]" loc="T5";
+net "a[6]" loc="V8";
+net "a[5]" loc="U8";
+net "a[4]" loc="N8";
+net "a[3]" loc="M8";
+net "a[2]" loc="V9";
+net "a[1]" loc="T9";
+net "a[0]" loc="T10";
+
+net "d[19]" loc="T17";
+net "d[18]" loc="T18";
+net "d[17]" loc="U17";
+net "d[16]" loc="U18";
+net "d[15]" loc="M14";
+net "d[14]" loc="N14";
+net "d[13]" loc="L14";
+net "d[12]" loc="M13";
+
+net "d[11]" loc="N16";
+net "d[10]" loc="N15";
+net  "d[9]" loc="P18";
+net  "d[8]" loc="P17";
+
+net "d[7]" loc="T11";
+net "d[6]" loc="R11";
+net "d[5]" loc="N11";
+net "d[4]" loc="M11";
+net "d[3]" loc="V15";
+net "d[2]" loc="U15";
+net "d[1]" loc="V16";
+net "d[0]" loc="U16";

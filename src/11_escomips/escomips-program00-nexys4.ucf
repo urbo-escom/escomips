@@ -1,0 +1,19 @@
+net "clk"  loc="E3" | iostandard = "LVCMOS33";
+net "clr"  loc="U9" | iostandard = "LVCMOS33";
+
+net "led[15]"  loc="P2" | iostandard = "LVCMOS33";
+net "led[14]"  loc="R2" | iostandard = "LVCMOS33";
+net "led[13]"  loc="U1" | iostandard = "LVCMOS33";
+net "led[12]"  loc="P5" | iostandard = "LVCMOS33";
+net "led[11]"  loc="R1" | iostandard = "LVCMOS33";
+net "led[10]"  loc="V1" | iostandard = "LVCMOS33";
+net  "led[9]"  loc="U3" | iostandard = "LVCMOS33";
+net  "led[8]"  loc="V4" | iostandard = "LVCMOS33";
+net  "led[7]"  loc="U6" | iostandard = "LVCMOS33";
+net  "led[6]"  loc="U7" | iostandard = "LVCMOS33";
+net  "led[5]"  loc="T4" | iostandard = "LVCMOS33";
+net  "led[4]"  loc="T5" | iostandard = "LVCMOS33";
+net  "led[3]"  loc="T6" | iostandard = "LVCMOS33";
+net  "led[2]"  loc="R8" | iostandard = "LVCMOS33";
+net  "led[1]"  loc="V9" | iostandard = "LVCMOS33";
+net  "led[0]"  loc="T8" | iostandard = "LVCMOS33";

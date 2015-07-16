@@ -1,0 +1,20 @@
+net "clr" loc="C4";
+net "clk" loc="V10";
+net "init" loc="C9";
+
+net "d[7]" loc="T5";
+net "d[6]" loc="V8";
+net "d[5]" loc="U8";
+net "d[4]" loc="N8";
+net "d[3]" loc="M8";
+net "d[2]" loc="V9";
+net "d[1]" loc="T9";
+net "d[0]" loc="T10";
+
+net "display7[6]" loc="T17";
+net "display7[5]" loc="T18";
+net "display7[4]" loc="U17";
+net "display7[3]" loc="U18";
+net "display7[2]" loc="M14";
+net "display7[1]" loc="N14";
+net "display7[0]" loc="L14";

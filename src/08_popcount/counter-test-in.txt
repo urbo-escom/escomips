@@ -1,0 +1,30 @@
+# format:
+#     clr  load    en       d  |       q
+#     0/1   0/1   0/1  0x0000  |  0x0000
+#
+
+# clear
+        1     0     0     0x0
+
+# wait
+        0     0     0     0x0
+        0     0     0     0x0
+        0     0     0     0x0
+
+# count
+        0     0     1     0x0
+        0     0     1     0x0
+        0     0     1     0x0
+        0     0     1     0x0
+        0     0     1     0x0
+
+# load and count
+        0     1     0    0x3F
+        0     0     1     0x0
+        0     0     1     0x0
+        0     0     1     0x0
+        0     0     1     0x0
+        0     0     1     0x0
+
+# wait for last
+        0     0     0     0

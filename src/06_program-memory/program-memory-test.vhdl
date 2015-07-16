@@ -5,6 +5,7 @@ library ieee;
 	use ieee.numeric_std.all;
 
 library work;
+	use work.types.all;
 	use work.math.log;
 	use work.ctype.num_base;
 	use work.conv.str2int;
@@ -28,18 +29,25 @@ architecture program_memory_test_arch of program_memory_test is
 	signal clk_en: std_logic := '1';
 	signal clk: std_logic;
 
-	constant program_size: positive := 4096;
-	constant data_width: positive := 25;
+	constant program_size: positive := 256;
+	constant program: slv25_arr_t(0 to program_size-1) := (
+		0 => "00001" & "0000" & "0000" & "0000" & "0000" & "0101",
+		1 => "00001" & "0001" & "0000" & "0000" & "0000" & "1010",
+		2 => "00000" & "0001" & "0001" & "0000" & "XXXX" & "0000",
+		3 => "00011" & "0001" & "0000" & "0000" & "0000" & "0101",
+		4 => "10011" & "XXXX" & "0000" & "0000" & "0000" & "0010",
+		5 => "11111" & "1111" & "1111" & "1111" & "1111" & "1111",
+		others => (others => '1')
+		);
 	signal a: std_logic_vector(log(program_size, 2)-1 downto 0);
-	signal d: std_logic_vector(data_width-1 downto 0);
+	signal d: std_logic_vector(24 downto 0);
 
-	alias opcode: std_logic_vector(data_width-1 downto 20) is
-	                          d(data_width-1 downto 20);
-	alias data4: std_logic_vector(19 downto 16) is d(19 downto 16);
-	alias data3: std_logic_vector(15 downto 12) is d(15 downto 12);
-	alias data2: std_logic_vector(11 downto  8) is d(11 downto  8);
-	alias data1: std_logic_vector( 7 downto  4) is d( 7 downto  4);
-	alias data0: std_logic_vector( 3 downto  0) is d( 3 downto  0);
+	alias opcode: std_logic_vector(24 downto 20) is d(24 downto 20);
+	alias data4:  std_logic_vector(19 downto 16) is d(19 downto 16);
+	alias data3:  std_logic_vector(15 downto 12) is d(15 downto 12);
+	alias data2:  std_logic_vector(11 downto  8) is d(11 downto  8);
+	alias data1:  std_logic_vector( 7 downto  4) is d( 7 downto  4);
+	alias data0:  std_logic_vector( 3 downto  0) is d( 3 downto  0);
 
 begin
 
@@ -50,10 +58,9 @@ begin
 	program_memory0: entity work.program_memory
 	generic map (
 		program_size => program_size,
-		data_width => data_width
+		program => program
 	)
 	port map (
-		clk => clk,
 		a => a,
 		d => d
 	);

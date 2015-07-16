@@ -21,19 +21,20 @@ entity escomips is
 		debug_alu:           boolean := false;
 		debug_data_memory:   boolean := false;
 		debug_control:       boolean := false;
+		mem_size: positive := 256;
 		stack_size: positive := 8;
-		word_size: positive := 16
+		word_width: positive := 16
 	);
 	port (
 		clk: in std_logic;
 		clr: in std_logic;
 		instr: in std_logic_vector(24 downto 0);
 		micro: out std_logic_vector(19 downto 0);
-		pc:    out std_logic_vector(word_size-1 downto 0);
-		reg1:  out std_logic_vector(word_size-1 downto 0);
-		reg2:  out std_logic_vector(word_size-1 downto 0);
-		alu:   out std_logic_vector(word_size-1 downto 0);
-		mem:   out std_logic_vector(word_size-1 downto 0);
+		pc:    out std_logic_vector(word_width-1 downto 0);
+		reg1:  out std_logic_vector(word_width-1 downto 0);
+		reg2:  out std_logic_vector(word_width-1 downto 0);
+		alu:   out std_logic_vector(word_width-1 downto 0);
+		mem:   out std_logic_vector(word_width-1 downto 0);
 		flags: out std_logic_vector(3 downto 0)
 	);
 end escomips;
@@ -54,10 +55,10 @@ architecture escomips_arch of escomips is
 	signal stack_up: std_logic;
 	signal stack_dw: std_logic;
 	signal stack_wpc: std_logic;
-	signal stack_d: std_logic_vector(word_size-1 downto 0);
-	signal stack_q: std_logic_vector(word_size-1 downto 0);
-	signal mux_sr: std_logic_vector(word_size-1 downto 0);
-	signal mux_sdmp: std_logic_vector(word_size-1 downto 0);
+	signal stack_d: std_logic_vector(word_width-1 downto 0);
+	signal stack_q: std_logic_vector(word_width-1 downto 0);
+	signal mux_sr: std_logic_vector(word_width-1 downto 0);
+	signal mux_sdmp: std_logic_vector(word_width-1 downto 0);
 
 	-- Registers
 	constant reg_size: positive := 16;
@@ -67,31 +68,31 @@ architecture escomips_arch of escomips is
 	signal reg_rr1: std_logic_vector(log(reg_size, 2)-1 downto 0);
 	signal reg_rr2: std_logic_vector(log(reg_size, 2)-1 downto 0);
 	signal reg_wrr: std_logic_vector(log(reg_size, 2)-1 downto 0);
-	signal reg_wrd: std_logic_vector(word_size-1 downto 0);
-	signal reg_shamt: std_logic_vector(log(word_size, 2)-1 downto 0);
-	signal reg_rd1: std_logic_vector(word_size-1 downto 0);
-	signal reg_rd2: std_logic_vector(word_size-1 downto 0);
+	signal reg_wrd: std_logic_vector(word_width-1 downto 0);
+	signal reg_shamt: std_logic_vector(log(word_width, 2)-1 downto 0);
+	signal reg_rd1: std_logic_vector(word_width-1 downto 0);
+	signal reg_rd2: std_logic_vector(word_width-1 downto 0);
 	signal mux_sr2: std_logic_vector(log(reg_size, 2)-1 downto 0);
-	signal mux_swd: std_logic_vector(word_size-1 downto 0);
+	signal mux_swd: std_logic_vector(word_width-1 downto 0);
 
 	-- ALU
-	signal alu_a: std_logic_vector(word_size-1 downto 0);
-	signal alu_b: std_logic_vector(word_size-1 downto 0);
+	signal alu_a: std_logic_vector(word_width-1 downto 0);
+	signal alu_b: std_logic_vector(word_width-1 downto 0);
 	signal alu_op: std_logic_vector(3 downto 0);
-	signal alu_s: std_logic_vector(word_size-1 downto 0);
+	signal alu_s: std_logic_vector(word_width-1 downto 0);
 	signal alu_flags: std_logic_vector(3 downto 0);
-	signal mux_sop1: std_logic_vector(word_size-1 downto 0);
-	signal mux_sop2: std_logic_vector(word_size-1 downto 0);
-	signal mux_sext: std_logic_vector(word_size-1 downto 0);
-	signal dir_ext_d: std_logic_vector(word_size-1 downto 0);
-	signal sign_ext_d: std_logic_vector(word_size-1 downto 0);
+	signal mux_sop1: std_logic_vector(word_width-1 downto 0);
+	signal mux_sop2: std_logic_vector(word_width-1 downto 0);
+	signal mux_sext: std_logic_vector(word_width-1 downto 0);
+	signal dir_ext: std_logic_vector(word_width-1 downto 0);
+	signal sign_ext: std_logic_vector(word_width-1 downto 0);
 
 	-- Data memory
 	signal mem_wr: std_logic;
-	signal mem_a: std_logic_vector(word_size-1 downto 0);
-	signal mem_di: std_logic_vector(word_size-1 downto 0);
-	signal mem_do: std_logic_vector(word_size-1 downto 0);
-	signal mux_sdmd: std_logic_vector(word_size-1 downto 0);
+	signal mem_a: std_logic_vector(word_width-1 downto 0);
+	signal mem_di: std_logic_vector(word_width-1 downto 0);
+	signal mem_do: std_logic_vector(word_width-1 downto 0);
+	signal mux_sdmd: std_logic_vector(word_width-1 downto 0);
 
 	-- Control
 	signal control_opcode: std_logic_vector(4 downto 0);
@@ -115,7 +116,7 @@ begin
 	generic map (
 		debug => debug_stack,
 		stack_size => stack_size,
-		addr_width => word_size
+		addr_width => word_width
 	)
 	port map (
 		clk => clk,
@@ -132,7 +133,7 @@ begin
 	stack_d   <= mux_sdmp;
 		-- mux
 		mux0: entity work.mux2to1
-		generic map (size => word_size)
+		generic map (size => word_width)
 		port map (
 			a => lit16,
 			b => mux_sr,
@@ -141,7 +142,7 @@ begin
 		);
 		-- mux
 		mux1: entity work.mux2to1
-		generic map (size => word_size)
+		generic map (size => word_width)
 		port map (
 			a => mem_do,
 			b => alu_s,
@@ -153,7 +154,7 @@ begin
 	generic map (
 		debug => debug_register_file,
 		reg_size => reg_size,
-		data_width => word_size
+		data_width => word_width
 	)
 	port map (
 		clk   => clk,
@@ -188,7 +189,7 @@ begin
 		);
 		-- mux
 		mux3: entity work.mux2to1
-		generic map (size => word_size)
+		generic map (size => word_width)
 		port map (
 			a => lit16,
 			b => mux_sr,
@@ -199,7 +200,7 @@ begin
 	alu0: entity work.alu
 	generic map (
 		debug => debug_alu,
-		size => word_size
+		size => word_width
 	)
 	port map (
 		a     => alu_a,
@@ -213,7 +214,7 @@ begin
 	alu_op <= control_microcode(MICRO_ALUOP_UP downto MICRO_ALUOP_DW);
 		-- mux
 		mux4: entity work.mux2to1
-		generic map (size => word_size)
+		generic map (size => word_width)
 		port map (
 			a => reg_rd1,
 			b => stack_q,
@@ -222,7 +223,7 @@ begin
 		);
 		-- mux
 		mux5: entity work.mux2to1
-		generic map (size => word_size)
+		generic map (size => word_width)
 		port map (
 			a => reg_rd2,
 			b => mux_sext,
@@ -230,31 +231,14 @@ begin
 			z => mux_sop2
 		);
 
-	dir_ext0: entity work.dir_ext
-	generic map (
-		di_size => lit12'length,
-		do_size => word_size
-	)
-	port map (
-		di => lit12,
-		do => dir_ext_d
-	);
-	--
-	sign_ext0: entity work.sign_ext
-	generic map (
-		di_size => lit12'length,
-		do_size => word_size
-	)
-	port map (
-		di => lit12,
-		do => sign_ext_d
-	);
+	dir_ext  <= std_logic_vector(resize(unsigned(lit12), word_width));
+	sign_ext <= std_logic_vector(resize(signed(lit12), word_width));
 		-- mux
 		mux6: entity work.mux2to1
-		generic map (size => word_size)
+		generic map (size => word_width)
 		port map (
-			a => dir_ext_d,
-			b => sign_ext_d,
+			a => dir_ext,
+			b => sign_ext,
 			s => control_microcode(MICRO_MUX_SEXT),
 			z => mux_sext
 		);
@@ -262,13 +246,13 @@ begin
 	data_memory0: entity work.data_memory
 	generic map (
 		debug => debug_data_memory,
-		addr_width => word_size,
-		data_width => word_size
+		mem_size => mem_size,
+		data_width => word_width
 	)
 	port map (
 		clk => clk,
 		wr  => mem_wr,
-		a   => mem_a,
+		a   => mem_a(log(mem_size, 2)-1 downto 0),
 		di  => mem_di,
 		do  => mem_do
 	);
@@ -277,7 +261,7 @@ begin
 	mem_di <= reg_rd2;
 		-- mux
 		mux7: entity work.mux2to1
-		generic map (size => word_size)
+		generic map (size => word_width)
 		port map (
 			a => alu_s,
 			b => lit16,

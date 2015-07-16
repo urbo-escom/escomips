@@ -12,8 +12,8 @@ library work;
 entity register_file is
 	generic (
 		debug: boolean := false;
-		reg_size: positive := 16;
-		data_width: positive := 16
+		reg_size: positive := 2;
+		data_width: positive := 2
 	);
 	port (
 		clk: in std_logic;
@@ -37,6 +37,8 @@ architecture register_file_arch of register_file is
 	type arr is array (0 to reg_size-1) of
 		std_logic_vector(data_width-1 downto 0);
 	signal r: arr := (others => (others => '0'));
+	attribute ram_style: string;
+	attribute ram_style of r: signal is "distributed";
 
 	alias slv is to_stdlogicvector [bit_vector return std_logic_vector];
 	alias bv is to_bitvector [std_logic_vector, bit return bit_vector];

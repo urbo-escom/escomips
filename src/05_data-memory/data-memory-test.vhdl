@@ -5,6 +5,7 @@ library ieee;
 	use ieee.numeric_std.all;
 
 library work;
+	use work.math.log;
 	use work.ctype.num_base;
 	use work.conv.str2int;
 	use work.conv.int2str;
@@ -26,10 +27,10 @@ architecture data_memory_test_arch of data_memory_test is
 	signal clk_en: std_logic := '1';
 	signal clk: std_logic;
 
-	constant addr_width: positive := 11;
+	constant mem_size: positive := 2048;
 	constant data_width: positive := 16;
 	signal wr: std_logic;
-	signal a: std_logic_vector(addr_width-1 downto 0);
+	signal a: std_logic_vector(log(mem_size, 2)-1 downto 0);
 	signal di: std_logic_vector(data_width-1 downto 0);
 	signal do: std_logic_vector(data_width-1 downto 0);
 
@@ -45,7 +46,7 @@ begin
 	data_memory0: entity work.data_memory
 	generic map (
 		debug => true,
-		addr_width => addr_width,
+		mem_size => mem_size,
 		data_width => data_width
 	)
 	port map (

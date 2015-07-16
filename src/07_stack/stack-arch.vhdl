@@ -12,7 +12,7 @@ entity stack is
 	generic (
 		debug: boolean := false;
 		stack_size: positive := 8;
-		addr_width: positive := 15
+		addr_width: positive := 4
 	);
 	port (
 		clk: in std_logic;
@@ -35,7 +35,7 @@ begin
 	ctrl <= up & dw & wpc;
 	process (clk, clr)
 		variable i: natural range 0 to stack_size-1 := 0;
-		variable s: arr;
+		variable s: arr := (others => (others => '0'));
 	begin
 		if rising_edge(clk) then
 
